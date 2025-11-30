@@ -18,12 +18,14 @@
             overflow-x: hidden; 
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            display: flex;
+            flex-direction: column;
         }
 
         /* --- LEVEL SELECT STYLES --- */
         .level-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             gap: 12px;
             max-width: 500px;
             margin: 0 auto;
@@ -37,7 +39,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: #4b5563;
             cursor: pointer;
@@ -48,7 +50,15 @@
         }
 
         .level-box:active { transform: translateY(2px); border-bottom-width: 0px; margin-top: 4px; }
-        .level-box.locked { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; border-bottom-color: #d1d5db; }
+        
+        .level-box.locked { 
+            background: #f3f4f6; 
+            color: #9ca3af; 
+            cursor: not-allowed; 
+            border-bottom-color: #d1d5db; 
+            border: 2px solid #e5e7eb;
+        }
+        
         .level-box.unlocked { background: #fff; border: 2px solid #d946ef; border-bottom: 4px solid #c026d3; color: #d946ef; }
         .level-box.completed { background: #dcfce7; border-color: #22c55e; color: #15803d; }
 
@@ -89,11 +99,16 @@
         .star-anim:nth-child(2) { animation-delay: 0.4s; }
         .star-anim:nth-child(3) { animation-delay: 0.6s; }
 
+        /* Animasi Bintang Terbang */
+        @keyframes flyStar {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.2); opacity: 0; }
+        }
+
         /* --- UTILS --- */
         .hidden-force { display: none !important; }
         .flex-center { display: flex; align-items: center; justify-content: center; }
         
-        /* Modal Wrapper: Flex Centering untuk HP */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -109,6 +124,51 @@
         .char-box { width: 34px; margin: 0 1px; display: flex; flex-direction: column; align-items: center; }
         .word-wrapper { display: flex; margin-right: 14px; margin-bottom: 10px; }
         
+        /* Posisi Tombol Pengaturan */
+        #settings-btn {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 9000;
+        }
+
+        /* Posisi Bintang Total */
+        #star-display-fixed {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 9000;
+            transition: transform 0.2s;
+        }
+
+        /* Range Slider Custom Style */
+        input[type=range] {
+            height: 6px;
+            border-radius: 5px;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid currentColor;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Accordion Style */
+        .audio-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .audio-details.open {
+            max-height: 200px;
+        }
+
         @media (min-width: 640px) {
             .char-box { width: 48px; margin: 0 3px; }
             .letter-input { font-size: 2.2rem; height: 55px; }
@@ -118,18 +178,22 @@
 </head>
 <body class="min-h-screen text-gray-800">
 
-    <!-- GLOBAL AUDIO CONTROLLER -->
-    <button id="audio-toggle" class="fixed top-4 right-4 z-50 bg-white p-3 rounded-full shadow-lg border-2 hover:bg-gray-50 transition transform hover:scale-105 active:scale-95" title="Musik">
-        <i id="audio-icon" class="fa-solid fa-volume-xmark text-red-400 text-xl w-6 h-6 flex items-center justify-center"></i>
+    <!-- DISPLAY BINTANG TOTAL (POJOK KIRI ATAS) -->
+    <div id="star-display-fixed" class="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border-2 border-yellow-400 transform hover:scale-105 transition-transform duration-300">
+        <i class="fa-solid fa-star text-yellow-500 text-xl animate-[spin_4s_linear_infinite]"></i>
+        <span id="total-stars-fixed" class="font-bold text-gray-700 text-xl font-sans">0</span>
+    </div>
+
+    <!-- TOMBOL PENGATURAN (POJOK KANAN ATAS) -->
+    <button id="settings-btn" onclick="openSettings()" class="bg-white p-3 rounded-full shadow-lg border-2 hover:bg-gray-50 transition transform hover:scale-105 active:scale-95 flex items-center justify-center w-12 h-12 text-gray-600">
+        <i class="fa-solid fa-gear text-xl"></i>
     </button>
 
     <!-- ================= HALAMAN HOME (LEVEL SELECT) ================= -->
-    <div id="home-screen" class="min-h-screen flex flex-col items-center justify-center p-4 relative">
+    <div id="home-screen" class="flex-grow flex flex-col items-center justify-center p-4 relative pt-24">
         <div class="text-center mb-8 animate-pop">
-            <h1 class="text-5xl font-bold text-purple-600 mb-2 drop-shadow-sm" style="text-shadow: 2px 2px 0px #fff;">SANDI KATA</h1>
-            <div class="inline-block bg-white/90 px-5 py-2 rounded-full shadow-sm border border-purple-100">
-                <p class="text-purple-500 font-bold">🎯 Misi: Kumpulkan Bintang!</p>
-            </div>
+            <h1 class="text-5xl md:text-6xl font-bold text-purple-600 mb-2 drop-shadow-sm" style="text-shadow: 2px 2px 0px #fff;">SANDI KATA</h1>
+            <p class="text-gray-500 font-bold tracking-wider text-sm bg-white/60 px-4 py-1 rounded-full inline-block">Kumpulkan Bintang untuk Membuka Gembok!</p>
         </div>
 
         <div class="bg-white/70 backdrop-blur-md p-6 rounded-3xl shadow-xl w-full max-w-2xl border border-white/60">
@@ -144,7 +208,7 @@
     </div>
 
     <!-- ================= HALAMAN GAME ================= -->
-    <div id="game-screen" class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4 hidden-force">
+    <div id="game-screen" class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4 hidden-force pt-12">
         <div class="game-card max-w-4xl w-full shadow-2xl rounded-[2rem] p-5 md:p-8 border border-white/50 relative">
             
             <!-- Header Game -->
@@ -152,7 +216,7 @@
                 <button onclick="backToHome()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl font-bold text-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Menu
                 </button>
-                <div class="flex flex-col items-end">
+                <div class="flex flex-col items-end pr-10"> 
                     <span id="level-title" class="text-2xl font-bold text-purple-600 leading-none">Level 1</span>
                     <span id="difficulty-badge" class="text-xs font-bold px-2 py-1 rounded bg-green-100 text-green-600 mt-1">
                         Mudah
@@ -185,62 +249,135 @@
         </div>
     </div>
 
+    <!-- FOOTER COPYRIGHT -->
+    <footer class="text-center p-4 text-xs text-gray-400 font-bold mt-auto">
+        &copy; Riyan 2025
+    </footer>
+
     <!-- ================= MODALS ================= -->
 
-    <!-- Modal Menang (Result) -->
+    <!-- Modal Pengaturan -->
+    <div id="settings-modal" class="modal-overlay hidden-force" style="z-index: 9500;">
+        <div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop">
+            <h3 class="font-bold text-2xl text-gray-800 mb-6 border-b pb-2">Pengaturan</h3>
+            
+            <div class="space-y-3">
+                <!-- Section Audio -->
+                <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+                    <button id="audio-accordion-btn" class="w-full flex items-center justify-between p-3 bg-white hover:bg-gray-50 transition border-b border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <i id="audio-icon-main" class="fa-solid fa-volume-high text-green-500 text-lg"></i>
+                            <span class="font-bold text-gray-700 text-sm">Suara & Musik</span>
+                        </div>
+                        <i id="audio-chevron" class="fa-solid fa-chevron-down text-gray-400 text-xs transition-transform duration-300"></i>
+                    </button>
+                    <div id="audio-sliders-panel" class="audio-details bg-gray-50 px-3">
+                        <div class="py-3 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-gray-500">Status Suara</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="master-mute-toggle" class="sr-only peer" checked>
+                                    <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
+                                </label>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold text-gray-500 mb-1">
+                                    <span>Musik Latar</span>
+                                    <span id="bgm-val-display" class="text-purple-600">20%</span>
+                                </div>
+                                <input type="range" id="bgm-slider" min="0" max="100" value="20" class="w-full accent-purple-500 bg-gray-200 h-1.5 rounded-lg cursor-pointer">
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold text-gray-500 mb-1">
+                                    <span>Efek Suara</span>
+                                    <span id="sfx-val-display" class="text-pink-600">80%</span>
+                                </div>
+                                <input type="range" id="sfx-slider" min="0" max="100" value="80" class="w-full accent-pink-500 bg-gray-200 h-1.5 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <button onclick="openInfoModal()" class="w-full flex items-center justify-between bg-blue-50 p-3 rounded-xl hover:bg-blue-100 transition text-blue-700 border border-blue-200">
+                    <span class="font-bold text-sm"><i class="fa-solid fa-circle-question mr-2"></i> Cara Bermain</span>
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+                <button onclick="openAboutModal()" class="w-full flex items-center justify-between bg-purple-50 p-3 rounded-xl hover:bg-purple-100 transition text-purple-700 border border-purple-200">
+                    <span class="font-bold text-sm"><i class="fa-solid fa-info-circle mr-2"></i> Tentang</span>
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+            <button onclick="closeSettings()" class="mt-6 w-full bg-gray-800 text-white py-3 rounded-xl font-bold hover:bg-gray-700 transition">Tutup</button>
+        </div>
+    </div>
+
+    <!-- Modal Info & About (Same as before) -->
+    <div id="info-modal" class="modal-overlay hidden-force" style="z-index: 9600;">
+        <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full animate-pop relative">
+            <button onclick="closeInfoModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h3 class="font-bold text-2xl text-purple-600 mb-4 text-center">Cara Bermain</h3>
+            <ul class="space-y-3 text-sm text-gray-600 text-left">
+                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">1</span> Setiap angka mewakili satu huruf yang sama.</li>
+                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">2</span> Isi kotak kosong berdasarkan petunjuk gambar dan pertanyaan.</li>
+                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">3</span> Huruf yang kamu isi akan otomatis muncul di kotak lain dengan angka yang sama.</li>
+                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">4</span> Hindari kesalahan untuk mendapatkan 3 Bintang!</li>
+            </ul>
+            <div class="mt-6 bg-green-50 p-3 rounded-lg border border-green-100 text-center"><p class="text-xs text-green-700 font-bold">Tips: Kotak hijau adalah huruf bantuan.</p></div>
+            <button onclick="closeInfoModal()" class="mt-6 w-full bg-purple-600 text-white py-2 rounded-xl font-bold">Mengerti</button>
+        </div>
+    </div>
+
+    <div id="about-modal" class="modal-overlay hidden-force" style="z-index: 9700;">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full animate-pop relative text-center">
+            <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg text-white text-3xl font-bold"><i class="fa-solid fa-gamepad"></i></div>
+            <h3 class="font-bold text-2xl text-gray-800 mb-1">Sandi Kata</h3>
+            <p class="text-xs text-purple-500 font-bold mb-4 bg-purple-50 inline-block px-3 py-1 rounded-full">Versi 1.0.0</p>
+            <div class="space-y-3 text-sm text-gray-600 border-t pt-4 border-gray-100">
+                <div class="flex justify-between"><span class="text-gray-400">Pembuat</span><span class="font-bold text-gray-800">Riyan</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">Asal</span><span class="font-bold text-gray-800 text-right">Sumatera Utara,<br>Indonesia 🇮🇩</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">Rilis</span><span class="font-bold text-gray-800">2025</span></div>
+            </div>
+            <div class="mt-6 text-xs text-gray-400">Terima kasih telah bermain!<br>Dibuat dengan ❤️ untuk edukasi.</div>
+        </div>
+    </div>
+
+    <!-- Modal Menang -->
     <div id="win-modal" class="modal-overlay hidden-force">
         <div class="bg-white p-8 rounded-3xl text-center shadow-2xl max-w-sm w-full animate-pop relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#FFD700 2px, transparent 2px); background-size: 20px 20px;"></div>
-            
             <div id="result-emoji" class="text-7xl mb-2 filter drop-shadow-md">🎉</div>
             <h2 id="result-title" class="text-2xl font-bold text-gray-800 mb-1">LEVEL SELESAI</h2>
+            <!-- Container Bintang Popup -->
+            <div class="flex justify-center gap-2 mb-4 text-4xl py-2 relative" id="modal-stars"></div>
             
-            <div class="flex justify-center gap-2 mb-4 text-4xl py-2" id="modal-stars"></div>
             <p id="result-msg" class="text-gray-500 mb-6 text-sm font-medium">Kamu butuh minimal 2 bintang untuk lanjut.</p>
-
             <div class="flex flex-col gap-3">
-                <button id="btn-next-level" onclick="nextLevel()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition hidden-force">
-                    Lanjut Level Berikutnya <i class="fa-solid fa-forward ml-1"></i>
-                </button>
-                <button onclick="restartLevel()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition">
-                    <i class="fa-solid fa-rotate-right mr-1"></i> Main Ulang
-                </button>
-                <button onclick="backToHome()" class="w-full text-gray-400 text-sm font-bold py-2 hover:text-gray-600">
-                    Kembali ke Menu
-                </button>
+                <button id="btn-next-level" onclick="nextLevel()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition hidden-force">Lanjut Level Berikutnya <i class="fa-solid fa-forward ml-1"></i></button>
+                <button onclick="restartLevel()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition"><i class="fa-solid fa-rotate-right mr-1"></i> Main Ulang</button>
+                <button onclick="backToHome()" class="w-full text-gray-400 text-sm font-bold py-2 hover:text-gray-600">Kembali ke Menu</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Salah (Popup Toast) -->
+    <!-- Modal Helpers -->
     <div id="error-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 110;">
         <div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-red-500 min-w-[280px] animate-pop max-w-xs">
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-3">
-                <i class="fa-solid fa-xmark text-3xl text-red-500"></i>
-            </div>
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-xmark text-3xl text-red-500"></i></div>
             <h3 class="font-bold text-xl text-gray-800">Ups! Masih Salah</h3>
             <p class="text-gray-500 text-sm mt-1 mb-4 text-center">Ada <b id="toast-count" class="text-red-500 text-lg"></b> kotak yang belum tepat.</p>
-            <button onclick="closeToast()" class="w-full bg-red-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition shadow-md">
-                Coba Perbaiki
-            </button>
+            <button onclick="closeToast()" class="w-full bg-red-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition shadow-md">Coba Perbaiki</button>
         </div>
     </div>
-
-    <!-- Modal Info (Notifikasi) -->
-    <div id="info-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 115;">
+    <div id="info-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 9700;">
         <div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-blue-500 min-w-[280px] animate-pop max-w-xs">
-            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
-                <i class="fa-solid fa-info text-3xl text-blue-500"></i>
-            </div>
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-info text-3xl text-blue-500"></i></div>
             <h3 class="font-bold text-xl text-gray-800">Info</h3>
             <p id="info-msg" class="text-gray-500 text-sm mt-1 mb-4 text-center">Pesan Info</p>
-            <button onclick="closeInfoToast()" class="w-full bg-blue-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-600 transition shadow-md">
-                Mengerti
-            </button>
+            <button onclick="closeInfoToast()" class="w-full bg-blue-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-600 transition shadow-md">Mengerti</button>
         </div>
     </div>
-
-    <!-- Modal Konfirmasi Reset -->
     <div id="reset-modal" class="modal-overlay hidden-force" style="z-index: 120;">
         <div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop border-t-4 border-red-500">
             <div class="text-5xl mb-3">⚠️</div>
@@ -269,144 +406,182 @@
         ];
 
         // --- GAME STATE ---
-        let userProgress = JSON.parse(localStorage.getItem('sandiKataProgress')) || {
-            unlockedLevel: 1, 
-            stars: {} 
-        };
+        let userProgress = JSON.parse(localStorage.getItem('sandiKataProgress')) || { unlockedLevel: 1, stars: {} };
+        let audioPrefs = JSON.parse(localStorage.getItem('sandiKataAudio')) || { isMuted: false, bgmVolume: 20, sfxVolume: 80 };
+        let currentLevelIdx = 0, currentMistakes = 0, charToNumberMap = {};
+        let audioCtx = null;
+
+        // --- AUDIO ENGINE ---
+        function initAudioEngine() { if(!audioCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; audioCtx = new AudioContext(); } if(audioCtx.state === 'suspended') audioCtx.resume(); }
+        function playTone(freq, type, duration, vol = 0.5, startTime = null) {
+            if(audioPrefs.isMuted || !audioCtx) return;
+            const sfxGain = audioPrefs.sfxVolume / 100; const finalVol = vol * sfxGain; if(finalVol <= 0.01) return; 
+            const start = startTime || audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, start); gain.gain.setValueAtTime(finalVol, start);
+            gain.gain.exponentialRampToValueAtTime(0.01, start + duration); osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(start); osc.stop(start + duration);
+        }
+        function playClickSound() { playTone(800, 'sine', 0.1, 0.4); } 
+        function playTypeSound() { playTone(1200, 'square', 0.05, 0.2); } 
+        function playBuzzer() {
+            if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume / 100; const finalVol = 0.5 * sfxGain; if(finalVol <= 0.01) return;
+            const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(80, now + 0.3); gain.gain.setValueAtTime(finalVol, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.3); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now + 0.3);
+        }
+        function playNotification() {
+            if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume / 100; const finalVol = 0.4 * sfxGain; if(finalVol <= 0.01) return;
+            const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine';
+            osc.frequency.setValueAtTime(500, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1); gain.gain.setValueAtTime(finalVol, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now + 0.5);
+        }
+        function playDeleteSound() {
+            if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume / 100; const finalVol = 0.4 * sfxGain; if(finalVol <= 0.01) return;
+            const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.2); gain.gain.setValueAtTime(finalVol, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.2); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now + 0.2);
+        }
+        function playWinTune() {
+            if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume / 100; const vol = 0.4 * sfxGain; if(vol <= 0.01) return;
+            const now = audioCtx.currentTime; playTone(523.25, 'sine', 0.15, vol, now); playTone(659.25, 'sine', 0.15, vol, now + 0.1); 
+            playTone(783.99, 'sine', 0.15, vol, now + 0.2); playTone(1046.50, 'sine', 0.4, vol, now + 0.3); 
+        }
+        function playAlertSound() {
+            if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume / 100; const vol = 0.3 * sfxGain; if(vol <= 0.01) return;
+            const now = audioCtx.currentTime; playTone(600, 'square', 0.1, vol, now); playTone(600, 'square', 0.1, vol, now + 0.15);
+        }
+        function playPopSound() { if(audioPrefs.isMuted || !audioCtx) return; playTone(700, 'triangle', 0.05, 0.3); }
+
+        const bgm = new Audio("https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3");
+        bgm.loop = true;
         
-        let currentLevelIdx = 0;
-        let currentMistakes = 0;
-        let charToNumberMap = {};
-        let isMuted = true;
-        let audioInitialized = false;
+        function updateBgmVolume() { if (audioPrefs.isMuted) bgm.volume = 0; else bgm.volume = (audioPrefs.bgmVolume / 100) * 0.4; }
 
-        // --- AUDIO SYSTEM (ROBUST) ---
-        // Menggunakan sumber audio yang lebih stabil (Github Raw) untuk menghindari blokir hotlink
-        const SOUND_URLS = {
-            click: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/click.mp3",
-            type: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/typewriter.mp3",
-            win: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/winner.mp3",
-            fail: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/error.mp3", // Tetot
-            unlock: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/coins.mp3",
-            notification: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/bell.mp3",
-            bgm: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/music.mp3" // Ganti dengan link BGM anda jika ada
-        };
-
-        const audio = {
-            bgm: new Audio("https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"), // Keep original BGM source
-            click: new Audio(SOUND_URLS.click),
-            type: new Audio(SOUND_URLS.type),
-            win: new Audio(SOUND_URLS.win),
-            fail: new Audio(SOUND_URLS.fail),
-            unlock: new Audio(SOUND_URLS.unlock),
-            notification: new Audio(SOUND_URLS.notification)
-        };
-        
-        audio.bgm.loop = true;
-        audio.bgm.volume = 0.3;
-
-        // --- GLOBAL CLICK LISTENER ---
-        // Menangkap semua klik di halaman untuk memutar suara klik UI
-        document.addEventListener('click', (e) => {
-            // Inisialisasi Audio Context pada interaksi pertama user
-            if (!audioInitialized && !isMuted) {
-                audio.bgm.play().catch(() => {});
-                audioInitialized = true;
-            }
-            
-            // Cek jika yang diklik adalah tombol atau input
-            if (e.target.closest('button') || e.target.closest('.level-box') || e.target.closest('input')) {
-                playSfx('click');
-            }
+        document.addEventListener('click', (event) => {
+            initAudioEngine();
+            if(!audioPrefs.isMuted && bgm.paused) { updateBgmVolume(); bgm.play().catch(() => {}); }
+            if(!event.target.matches('input[type="range"]')) playClickSound();
         });
 
-        // --- INIT ---
         window.onload = function() {
-            renderLevelGrid();
-            if(!userProgress.unlockedLevel) userProgress = { unlockedLevel: 1, stars: {} };
+            renderLevelGrid(); // Ini akan memperbarui total bintang di pojok kiri
+            
+            document.getElementById('bgm-slider').value = audioPrefs.bgmVolume;
+            document.getElementById('bgm-val-display').innerText = audioPrefs.bgmVolume + '%';
+            document.getElementById('sfx-slider').value = audioPrefs.sfxVolume;
+            document.getElementById('sfx-val-display').innerText = audioPrefs.sfxVolume + '%';
+            document.getElementById('master-mute-toggle').checked = !audioPrefs.isMuted;
+            updateAudioIconUI(); updateBgmVolume();
+            if(!audioPrefs.isMuted && audioPrefs.bgmVolume > 0) bgm.play().catch(() => console.log("Auto play blocked"));
         };
 
-        // --- AUDIO TOGGLE ---
-        const audioToggleBtn = document.getElementById('audio-toggle');
-        const audioIcon = document.getElementById('audio-icon');
+        function saveAudioPrefs() { localStorage.setItem('sandiKataAudio', JSON.stringify(audioPrefs)); }
 
-        audioToggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent double click sound
-            isMuted = !isMuted;
-            if(isMuted) {
-                audio.bgm.pause();
-                audioIcon.className = "fa-solid fa-volume-xmark text-red-400 text-xl";
-                audioToggleBtn.classList.remove('border-green-400');
-            } else {
-                audio.bgm.play().catch(e => console.log("Audio permission needed"));
-                audioIcon.className = "fa-solid fa-volume-high text-green-500 text-xl";
-                audioToggleBtn.classList.add('border-green-400');
-                playSfx('notification');
-                audioInitialized = true;
-            }
+        // --- UI UTILS & MODALS ---
+        function openSettings() { playPopSound(); document.getElementById('settings-modal').classList.remove('hidden-force'); }
+        function closeSettings() { playPopSound(); document.getElementById('settings-modal').classList.add('hidden-force'); }
+        function openInfoModal() { playPopSound(); document.getElementById('info-modal').classList.remove('hidden-force'); }
+        function closeInfoModal() { playPopSound(); document.getElementById('info-modal').classList.add('hidden-force'); }
+        function openAboutModal() { playPopSound(); document.getElementById('about-modal').classList.remove('hidden-force'); }
+        function closeAboutModal() { playPopSound(); document.getElementById('about-modal').classList.add('hidden-force'); }
+
+        const bgmSlider = document.getElementById('bgm-slider');
+        const sfxSlider = document.getElementById('sfx-slider');
+        const audioAccordionBtn = document.getElementById('audio-accordion-btn');
+        const audioSlidersPanel = document.getElementById('audio-sliders-panel');
+        const masterMuteToggle = document.getElementById('master-mute-toggle');
+
+        audioAccordionBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); const panel = audioSlidersPanel; const icon = document.getElementById('audio-chevron');
+            if (panel.style.maxHeight) { panel.style.maxHeight = null; icon.style.transform = "rotate(0deg)"; } 
+            else { panel.style.maxHeight = panel.scrollHeight + "px"; icon.style.transform = "rotate(180deg)"; }
         });
 
-        function playSfx(type) {
-            if (isMuted || !audio[type]) return;
-            // Gunakan cloneNode untuk suara pendek agar bisa overlap (cth: mengetik cepat)
-            const sound = audio[type].cloneNode();
-            sound.volume = 0.6;
-            sound.play().catch(() => {});
+        bgmSlider.addEventListener('input', function() { audioPrefs.bgmVolume = this.value; document.getElementById('bgm-val-display').innerText = this.value + '%'; updateBgmVolume(); saveAudioPrefs(); });
+        sfxSlider.addEventListener('input', function() { audioPrefs.sfxVolume = this.value; document.getElementById('sfx-val-display').innerText = this.value + '%'; saveAudioPrefs(); });
+        sfxSlider.addEventListener('change', function() { playTypeSound(); });
+
+        masterMuteToggle.addEventListener('change', (e) => { e.stopPropagation(); toggleMuteState(); });
+
+        function toggleMuteState() {
+            audioPrefs.isMuted = !audioPrefs.isMuted; initAudioEngine(); updateAudioIconUI();
+            if(audioPrefs.isMuted) { bgm.pause(); document.getElementById('master-mute-toggle').checked = false; } 
+            else { updateBgmVolume(); bgm.play().catch(() => {}); playNotification(); document.getElementById('master-mute-toggle').checked = true; }
+            saveAudioPrefs();
         }
 
-        // --- LEVEL & UI LOGIC ---
+        function updateAudioIconUI() {
+            const iconMain = document.getElementById('audio-icon-main');
+            if(audioPrefs.isMuted) iconMain.className = "fa-solid fa-volume-xmark text-red-400 text-lg";
+            else iconMain.className = "fa-solid fa-volume-high text-green-500 text-lg";
+        }
+
+        // --- LEVEL LOGIC ---
         function renderLevelGrid() {
+            const totalStars = Object.values(userProgress.stars).reduce((a, b) => a + b, 0);
+            document.getElementById('total-stars-fixed').innerText = totalStars;
+
             const container = document.getElementById('level-container');
             container.innerHTML = '';
+            
             for (let i = 1; i <= 10; i++) {
                 const box = document.createElement('div');
-                const isUnlocked = i <= userProgress.unlockedLevel;
                 const starsCount = userProgress.stars[i] || 0;
                 
+                const requiredStars = (i === 1) ? 0 : (i - 1) * 2;
+                const isUnlocked = totalStars >= requiredStars;
+
                 let classes = "level-box";
-                if (!isUnlocked) classes += " locked";
-                else if (starsCount > 0) classes += " unlocked completed";
-                else classes += " unlocked";
-                box.className = classes;
-                
-                if (isUnlocked) {
+                let content = "";
+
+                if (!isUnlocked) {
+                    classes += " locked";
+                    content = `
+                        <span class="text-gray-400 text-lg">${i}</span>
+                        <div class="flex flex-col items-center text-gray-400 mt-1">
+                            <i class="fa-solid fa-lock text-xs"></i>
+                            <span class="text-[9px] leading-tight mt-0.5">Butuh ${requiredStars}⭐</span>
+                        </div>
+                    `;
+                } else {
+                    if (starsCount > 0) classes += " unlocked completed"; else classes += " unlocked";
                     let starsHtml = '';
                     for(let s=1; s<=3; s++) starsHtml += `<i class="fa-solid fa-star ${s <= starsCount ? 'text-yellow-400' : 'text-gray-300'}"></i>`;
-                    box.innerHTML = `<span>${i}</span><div class="stars-container">${starsHtml}</div>`;
-                    box.onclick = () => loadLevel(i);
-                } else {
-                    box.innerHTML = `<i class="fa-solid fa-lock text-xl"></i>`;
+                    content = `<span>${i}</span><div class="stars-container">${starsHtml}</div>`;
+                    box.onclick = (e) => { e.stopPropagation(); loadLevel(i); };
                 }
+                
+                box.className = classes;
+                box.innerHTML = content;
                 container.appendChild(box);
             }
         }
 
+        function updateTotalStarsUI() {
+            // Helper function to update just the star count without re-rendering grid
+            const totalStars = Object.values(userProgress.stars).reduce((a, b) => a + b, 0);
+            document.getElementById('total-stars-fixed').innerText = totalStars;
+        }
+
         function loadLevel(levelNum) {
             currentLevelIdx = levelNum - 1;
-            let hintsCount = 0;
-            let diffLabel = "";
-
+            let hintsCount = 0; let diffLabel = "";
             if (levelNum <= 3) { hintsCount = 2; diffLabel = "Mudah (2 Bantuan)"; } 
             else if (levelNum <= 7) { hintsCount = 1; diffLabel = "Sedang (1 Bantuan)"; } 
             else { hintsCount = 0; diffLabel = "Sulit (Tanpa Bantuan)"; }
-
             const badge = document.getElementById('difficulty-badge');
             badge.innerText = diffLabel;
             badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 ${levelNum<=3 ? 'bg-green-100 text-green-600' : levelNum<=7 ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'}`;
-
             const levelData = LEVEL_DATA[currentLevelIdx % LEVEL_DATA.length];
-
             document.getElementById('home-screen').classList.add('hidden-force');
             document.getElementById('game-screen').classList.remove('hidden-force');
             document.getElementById('game-screen').classList.add('flex');
             document.getElementById('level-title').innerText = `Level ${levelNum}`;
             document.getElementById('mistake-counter').innerText = "0";
             document.getElementById('mistake-counter').className = "text-2xl font-bold text-gray-700";
-            
             currentMistakes = 0;
             generateMapping(levelData);
             renderGame(levelData);
-            
             if(hintsCount > 0) revealRandomHint(hintsCount);
         }
 
@@ -422,45 +597,36 @@
         function renderGame(data) {
             const qContainer = document.getElementById('quote-container');
             const cContainer = document.getElementById('clues-container');
-            qContainer.innerHTML = '';
-            cContainer.innerHTML = '';
-
+            qContainer.innerHTML = ''; cContainer.innerHTML = '';
             data.quote.split(' ').forEach(word => {
-                const wrap = document.createElement('div');
-                wrap.className = 'word-wrapper';
+                const wrap = document.createElement('div'); wrap.className = 'word-wrapper';
                 for(let char of word) wrap.appendChild(createBox(char));
                 qContainer.appendChild(wrap);
             });
-
             data.clues.forEach(clue => {
                 const row = document.createElement('div');
                 row.className = "bg-white p-3 rounded-xl border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-3 shadow-sm";
                 row.innerHTML = `<div class="flex items-center gap-3 w-full sm:w-1/3 min-w-[150px]"><div class="text-2xl bg-purple-50 w-10 h-10 flex items-center justify-center rounded-lg">${clue.icon}</div><span class="text-gray-700 font-bold text-sm leading-tight">${clue.q}</span></div>`;
-                const inputs = document.createElement('div');
-                inputs.className = "flex flex-wrap";
+                const inputs = document.createElement('div'); inputs.className = "flex flex-wrap";
                 clue.a.split(' ').forEach(word => {
-                    const wrap = document.createElement('div');
-                    wrap.className = 'word-wrapper';
+                    const wrap = document.createElement('div'); wrap.className = 'word-wrapper';
                     for(let char of word) wrap.appendChild(createBox(char));
                     inputs.appendChild(wrap);
                 });
-                row.appendChild(inputs);
-                cContainer.appendChild(row);
+                row.appendChild(inputs); cContainer.appendChild(row);
             });
         }
 
         function createBox(char) {
-            char = char.toUpperCase();
-            const num = charToNumberMap[char];
-            const div = document.createElement('div');
-            div.className = 'char-box';
+            char = char.toUpperCase(); const num = charToNumberMap[char];
+            const div = document.createElement('div'); div.className = 'char-box';
             div.innerHTML = `<input type="text" maxlength="1" class="letter-input" data-number="${num}" data-real="${char}" autocomplete="off" inputmode="text"><span class="text-[0.7rem] font-bold text-gray-400 mt-1">${num}</span>`;
             const inp = div.querySelector('input');
             inp.addEventListener('input', (e) => handleInput(e, inp));
             inp.addEventListener('focus', () => highlightBoxes(num, true));
             inp.addEventListener('blur', () => highlightBoxes(num, false));
             inp.addEventListener('keydown', (e) => handleNav(e, inp));
-            inp.addEventListener('click', function() { if(!this.classList.contains('locked')) this.select(); });
+            inp.addEventListener('click', function(e) { e.stopPropagation(); if(!this.classList.contains('locked')) this.select(); });
             return div;
         }
 
@@ -471,43 +637,41 @@
                 for(let i=0; i<count; i++) {
                     if(chars.length === 0) break;
                     const randIdx = Math.floor(Math.random() * chars.length);
-                    const char = chars[randIdx];
-                    chars.splice(randIdx, 1);
+                    const char = chars[randIdx]; chars.splice(randIdx, 1);
                     const num = charToNumberMap[char];
                     document.querySelectorAll(`.letter-input[data-number="${num}"]`).forEach(inp => {
-                        inp.value = char;
-                        inp.classList.add('locked');
+                        inp.value = char; inp.classList.add('locked');
                     });
                 }
             }, 500);
         }
 
+        // --- SMART SKIP & INPUT LOGIC ---
         function handleInput(e, el) {
-            let val = e.target.value.toUpperCase();
-            if(!/^[A-Z]$/.test(val)) {
-                if(val === "") syncInputs(el.dataset.number, "");
-                else el.value = "";
-                return;
-            }
-            playSfx('type'); // Suara ketik
-            syncInputs(el.dataset.number, val);
-            const next = el.parentElement.nextElementSibling;
-            if(next && next.querySelector('input')) {
-                const ni = next.querySelector('input');
-                ni.focus();
-                if(!ni.classList.contains('locked')) ni.select();
+            e.stopPropagation(); let val = e.target.value.toUpperCase();
+            if(!/^[A-Z]$/.test(val)) { if(val === "") syncInputs(el.dataset.number, ""); else el.value = ""; return; }
+            playTypeSound(); syncInputs(el.dataset.number, val); 
+            focusNextUnlockedInput(el);
+        }
+        
+        function focusNextUnlockedInput(currentInput) {
+            const wrapper = currentInput.closest('.word-wrapper'); if(!wrapper) return;
+            const inputs = Array.from(wrapper.querySelectorAll('.letter-input')); const currIdx = inputs.indexOf(currentInput);
+            for(let i = currIdx + 1; i < inputs.length; i++) {
+                // SKIP jika LOCKED atau SUDAH ADA ISI
+                if(!inputs[i].classList.contains('locked') && inputs[i].value === "") { 
+                    inputs[i].focus(); 
+                    // inputs[i].select(); // Optional, removed for smoother skip on mobile
+                    return; 
+                }
             }
         }
 
         function syncInputs(num, char) {
             document.querySelectorAll(`.letter-input[data-number="${num}"]`).forEach(inp => {
-                if(!inp.classList.contains('locked')) {
-                    inp.value = char;
-                    if(char) {
-                        inp.classList.remove('animate-pop');
-                        void inp.offsetWidth; 
-                        inp.classList.add('animate-pop');
-                    }
+                if(!inp.classList.contains('locked')) { 
+                    inp.value = char; 
+                    if(char) { inp.classList.remove('animate-pop'); void inp.offsetWidth; inp.classList.add('animate-pop'); } 
                 }
             });
         }
@@ -519,145 +683,116 @@
             });
         }
 
-        function handleNav(e, el) {
-            if(e.key === "Backspace" && el.value === "") {
-                const prev = el.parentElement.previousElementSibling;
-                if(prev && prev.querySelector('input')) {
-                    e.preventDefault();
-                    prev.querySelector('input').focus();
-                }
-            }
+        function handleNav(e, el) { if(e.key === "Backspace" && el.value === "") { e.preventDefault(); focusPrevUnlockedInput(el); } }
+        function focusPrevUnlockedInput(currentInput) {
+            const wrapper = currentInput.closest('.word-wrapper'); if(!wrapper) return;
+            const inputs = Array.from(wrapper.querySelectorAll('.letter-input')); const currIdx = inputs.indexOf(currentInput);
+            for(let i = currIdx - 1; i >= 0; i--) { if(!inputs[i].classList.contains('locked')) { inputs[i].focus(); setTimeout(() => inputs[i].select(), 0); return; } }
         }
 
         function checkAnswer() {
-            const inputs = document.querySelectorAll('.letter-input');
-            let isCorrect = true;
-            let levelErrors = 0;
+            const inputs = document.querySelectorAll('.letter-input'); let isCorrect = true; let levelErrors = 0;
             inputs.forEach(i => { if(!i.classList.contains('locked')) i.style.color = "#d946ef"; });
-            inputs.forEach(inp => {
-                if(inp.value !== inp.dataset.real) {
-                    isCorrect = false;
-                    levelErrors++;
-                    if(inp.value !== "") inp.style.color = "red";
-                }
-            });
-
-            if(!isCorrect) {
-                if(levelErrors > 0) currentMistakes++;
-                const counter = document.getElementById('mistake-counter');
-                counter.innerText = currentMistakes;
-                counter.className = "text-2xl font-bold text-red-500 animate-pulse";
-                showToast(levelErrors);
-                playSfx('fail'); // Tetot / Buzzer
-                return;
-            }
-
-            playSfx('win');
-            let stars = 0;
-            if(currentMistakes === 0) stars = 3; else if(currentMistakes <= 3) stars = 2; else stars = 1;
+            inputs.forEach(inp => { if(inp.value !== inp.dataset.real) { isCorrect = false; levelErrors++; if(inp.value !== "") inp.style.color = "red"; } });
+            if(!isCorrect) { if(levelErrors > 0) currentMistakes++; const counter = document.getElementById('mistake-counter'); counter.innerText = currentMistakes; counter.className = "text-2xl font-bold text-red-500 animate-pulse"; showToast(levelErrors); playBuzzer(); return; }
+            playWinTune(); let stars = 0; if(currentMistakes === 0) stars = 3; else if(currentMistakes <= 3) stars = 2; else stars = 1;
             showWinModal(stars);
         }
 
-        // --- MODAL & RESET LOGIC ---
-        function showWinModal(stars) {
-            const modal = document.getElementById('win-modal');
-            const starsContainer = document.getElementById('modal-stars');
-            const btnNext = document.getElementById('btn-next-level');
-            const msg = document.getElementById('result-msg');
-            const emoji = document.getElementById('result-emoji');
-            
-            let starHtml = '';
-            for(let i=1; i<=3; i++) starHtml += `<i class="fa-solid fa-star ${i <= stars ? 'text-yellow-400 star-anim' : 'text-gray-300'}"></i>`;
-            starsContainer.innerHTML = starHtml;
+        // --- ANIMASI BINTANG TERBANG ---
+        function animateStarsCollection(earnedStars) {
+            const startContainer = document.getElementById('modal-stars');
+            const targetElement = document.getElementById('star-display-fixed');
+            const totalText = document.getElementById('total-stars-fixed');
 
+            if(!startContainer || !targetElement) return;
+
+            // Dapatkan posisi
+            const startRect = startContainer.getBoundingClientRect();
+            const targetRect = targetElement.getBoundingClientRect();
+            const startX = startRect.left + startRect.width / 2;
+            const startY = startRect.top + startRect.height / 2;
+            const targetX = targetRect.left + targetRect.width / 2;
+            const targetY = targetRect.top + targetRect.height / 2;
+
+            for (let i = 0; i < earnedStars; i++) {
+                const star = document.createElement('div');
+                star.innerHTML = '<i class="fa-solid fa-star text-yellow-400 text-2xl drop-shadow-md"></i>';
+                star.style.position = 'fixed';
+                star.style.left = `${startX}px`;
+                star.style.top = `${startY}px`;
+                star.style.zIndex = '10000';
+                star.style.transition = 'all 0.8s cubic-bezier(0.19, 1, 0.22, 1)';
+                star.style.transform = 'scale(0)';
+                
+                document.body.appendChild(star);
+
+                // Sequence animation
+                setTimeout(() => {
+                    star.style.transform = 'scale(1.5)';
+                    
+                    setTimeout(() => {
+                        star.style.left = `${targetX}px`;
+                        star.style.top = `${targetY}px`;
+                        star.style.transform = 'scale(0.5)';
+                        star.style.opacity = '0';
+                    }, 100);
+
+                    setTimeout(() => {
+                        star.remove();
+                        updateTotalStarsUI(); // Update UI angka total secara otomatis
+                        targetElement.classList.add('scale-125');
+                        setTimeout(() => targetElement.classList.remove('scale-125'), 200);
+                        playNotification(); // Sound 'Ting' saat bintang sampai
+                    }, 900);
+
+                }, i * 200);
+            }
+        }
+
+        function showWinModal(stars) {
+            const modal = document.getElementById('win-modal'); const starsContainer = document.getElementById('modal-stars'); const btnNext = document.getElementById('btn-next-level'); const msg = document.getElementById('result-msg'); const emoji = document.getElementById('result-emoji');
+            let starHtml = ''; for(let i=1; i<=3; i++) starHtml += `<i class="fa-solid fa-star ${i <= stars ? 'text-yellow-400 star-anim' : 'text-gray-300'}"></i>`;
+            starsContainer.innerHTML = starHtml;
             const levelNum = currentLevelIdx + 1;
-            if(!userProgress.stars[levelNum] || stars > userProgress.stars[levelNum]) userProgress.stars[levelNum] = stars;
+            
+            // Simpan data
+            if(!userProgress.stars[levelNum] || stars > userProgress.stars[levelNum]) {
+                userProgress.stars[levelNum] = stars;
+            }
+            
+            // Calculate requirements for NEXT button logic
+            const totalStars = Object.values(userProgress.stars).reduce((a, b) => a + b, 0);
+            const nextLevelReq = (levelNum) * 2; 
 
             if(stars >= 2) {
-                emoji.innerText = "🎉";
-                document.getElementById('result-title').innerText = "LEVEL SELESAI!";
-                document.getElementById('result-title').className = "text-2xl font-bold text-green-600 mb-2";
+                emoji.innerText = "🎉"; document.getElementById('result-title').innerText = "LEVEL SELESAI!"; document.getElementById('result-title').className = "text-2xl font-bold text-green-600 mb-2";
                 if(userProgress.unlockedLevel < levelNum + 1 && levelNum < 10) userProgress.unlockedLevel = levelNum + 1;
                 
                 if(levelNum === 10) { msg.innerText = "Selamat! Kamu menamatkan semua level!"; btnNext.classList.add('hidden-force'); }
-                else { msg.innerText = "Hebat! Level selanjutnya terbuka."; btnNext.classList.remove('hidden-force'); }
-                setTimeout(() => playSfx('unlock'), 500);
+                else if (totalStars >= nextLevelReq) { msg.innerText = "Hebat! Level selanjutnya terbuka."; btnNext.classList.remove('hidden-force'); } 
+                else { msg.innerText = `Level ${levelNum+1} butuh total ${nextLevelReq} ⭐.`; btnNext.classList.add('hidden-force'); }
+                
+                // Trigger animasi bintang
+                setTimeout(() => animateStarsCollection(stars), 500);
+
             } else {
-                emoji.innerText = "💪";
-                document.getElementById('result-title').innerText = "AYO COBA LAGI";
-                document.getElementById('result-title').className = "text-2xl font-bold text-orange-500 mb-2";
-                msg.innerText = "Minimal 2 bintang untuk lanjut.";
-                btnNext.classList.add('hidden-force');
+                emoji.innerText = "💪"; document.getElementById('result-title').innerText = "AYO COBA LAGI"; document.getElementById('result-title').className = "text-2xl font-bold text-orange-500 mb-2"; msg.innerText = "Minimal 2 bintang untuk lanjut."; btnNext.classList.add('hidden-force');
             }
             localStorage.setItem('sandiKataProgress', JSON.stringify(userProgress));
             modal.classList.remove('hidden-force');
         }
 
-        function nextLevel() {
-            document.getElementById('win-modal').classList.add('hidden-force');
-            loadLevel(currentLevelIdx + 2);
-        }
-
-        function restartLevel() {
-            document.getElementById('win-modal').classList.add('hidden-force');
-            loadLevel(currentLevelIdx + 1);
-        }
-
-        function backToHome() {
-            document.getElementById('game-screen').classList.add('hidden-force');
-            document.getElementById('game-screen').classList.remove('flex');
-            document.getElementById('win-modal').classList.add('hidden-force');
-            document.getElementById('home-screen').classList.remove('hidden-force');
-            renderLevelGrid();
-        }
-
-        // Logic Toast Error
-        function showToast(count) {
-            const wrapper = document.getElementById('error-toast-wrapper');
-            document.getElementById('toast-count').innerText = count;
-            wrapper.classList.remove('hidden-force');
-        }
-        function closeToast() {
-            document.getElementById('error-toast-wrapper').classList.add('hidden-force');
-        }
-
-        // Logic Info Toast (Notifikasi Biru)
-        function showInfoPopup(msg) {
-            const wrapper = document.getElementById('info-toast-wrapper');
-            document.getElementById('info-msg').innerText = msg;
-            wrapper.classList.remove('hidden-force');
-        }
-        function closeInfoToast() {
-            document.getElementById('info-toast-wrapper').classList.add('hidden-force');
-        }
-
-        // Logic Reset dengan Pengecekan Data
-        function openResetModal() {
-            // Cek apakah ada data di localStorage
-            const savedData = localStorage.getItem('sandiKataProgress');
-            if (!savedData) {
-                // Jika tidak ada data, munculkan notifikasi info saja
-                playSfx('notification'); 
-                showInfoPopup("Belum ada data permainan yang tersimpan.");
-                return;
-            }
-            
-            // Jika ada data, munculkan modal konfirmasi
-            playSfx('fail'); // Suara alert ringan
-            document.getElementById('reset-modal').classList.remove('hidden-force');
-        }
-
-        function closeResetModal() {
-            document.getElementById('reset-modal').classList.add('hidden-force');
-        }
-        
-        function confirmReset() {
-            playSfx('notification'); // Suara notifikasi (Ting)
-            localStorage.removeItem('sandiKataProgress');
-            closeResetModal();
-            // Beri jeda 500ms agar suara sempat terdengar sebelum reload
-            setTimeout(() => location.reload(), 500);
-        }
+        function nextLevel() { document.getElementById('win-modal').classList.add('hidden-force'); loadLevel(currentLevelIdx + 2); }
+        function restartLevel() { document.getElementById('win-modal').classList.add('hidden-force'); loadLevel(currentLevelIdx + 1); }
+        function backToHome() { document.getElementById('game-screen').classList.add('hidden-force'); document.getElementById('game-screen').classList.remove('flex'); document.getElementById('win-modal').classList.add('hidden-force'); document.getElementById('home-screen').classList.remove('hidden-force'); renderLevelGrid(); }
+        function showToast(count) { const wrapper = document.getElementById('error-toast-wrapper'); document.getElementById('toast-count').innerText = count; wrapper.classList.remove('hidden-force'); }
+        function closeToast() { document.getElementById('error-toast-wrapper').classList.add('hidden-force'); }
+        function showInfoPopup(msg) { const wrapper = document.getElementById('info-toast-wrapper'); document.getElementById('info-msg').innerText = msg; wrapper.classList.remove('hidden-force'); }
+        function closeInfoToast() { document.getElementById('info-toast-wrapper').classList.add('hidden-force'); }
+        function openResetModal() { const savedData = localStorage.getItem('sandiKataProgress'); if (!savedData) { playNotification(); showInfoPopup("Belum ada data permainan yang tersimpan."); return; } playAlertSound(); document.getElementById('reset-modal').classList.remove('hidden-force'); }
+        function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden-force'); }
+        function confirmReset() { playDeleteSound(); localStorage.removeItem('sandiKataProgress'); userProgress = { unlockedLevel: 1, stars: {} }; renderLevelGrid(); closeResetModal(); showInfoPopup("Data berhasil direset!"); }
 
     </script>
 </body>
