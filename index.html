@@ -56,7 +56,7 @@
 
         .stars-container { display: flex; gap: 2px; margin-top: 2px; font-size: 0.6rem; }
 
-        /* --- GAME INPUT STYLES (PERBAIKAN RESPONSIVE) --- */
+        /* --- GAME INPUT STYLES (PERBAIKAN CSS RESPONSIVE DI SINI) --- */
         .game-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
 
         .letter-input {
@@ -67,10 +67,10 @@
             text-transform: uppercase;
             color: #d946ef;
             font-weight: bold;
-            /* Font size dinamis agar pas di kotak kecil */
-            font-size: 1.4rem; 
+            /* Font size dinamis: minimal 1rem, ideal 6% lebar layar, maks 2rem */
+            font-size: clamp(1rem, 6vw, 2rem);
             width: 100%;
-            height: 40px; /* Sedikit dikecilkan untuk HP kecil */
+            height: 100%; /* Mengisi container char-box */
             padding: 0;
             margin: 0;
             transition: all 0.2s;
@@ -79,6 +79,44 @@
         
         .letter-input:focus { outline: none; border-bottom-color: #d946ef; background-color: rgba(217, 70, 239, 0.1); }
         .letter-input.locked { color: #059669; background-color: rgba(5, 150, 105, 0.1); pointer-events: none; border-bottom-color: #059669; }
+
+        /* --- PERBAIKAN LEBAR KOTAK --- */
+        /* Menggunakan CLAMP agar lebar kotak menyesuaikan layar HP */
+        .char-box { 
+            /* Lebar: Min 22px (hp kecil), Ideal 8.5% layar, Max 48px (desktop) */
+            width: clamp(22px, 8.5vw, 48px); 
+            /* Tinggi menyesuaikan lebar agar proporsional */
+            height: clamp(35px, 12vw, 60px); 
+            margin: 0 1px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-end;
+        }
+
+        /* Wrapper kata agar selalu rapi */
+        .word-wrapper { 
+            display: flex; 
+            margin-right: 8px; /* Jarak antar kata dikurangi sedikit */
+            margin-bottom: 12px; 
+            justify-content: center;
+        }
+
+        /* Container utama dipaksa tengah */
+        #quote-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 0 5px; /* Sedikit padding agar tidak mepet pinggir */
+        }
+
+        /* Nomor di bawah huruf */
+        .char-box span {
+            font-size: clamp(0.6rem, 2.5vw, 0.8rem); /* Ukuran font nomor dinamis */
+            margin-top: 2px;
+        }
 
         /* --- ANIMATIONS --- */
         @keyframes popIn {
@@ -111,32 +149,6 @@
             justify-content: center;
             padding: 1rem;
             backdrop-filter: blur(4px);
-        }
-
-        /* --- PERBAIKAN UTAMA DI SINI --- */
-        /* Menggunakan ukuran dinamis (vw) untuk layar sangat kecil agar kata panjang muat */
-        .char-box { 
-            width: 28px; /* Default lebih kecil untuk HP sempit */
-            margin: 0 1px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-        }
-        
-        /* Margin antar kata dikurangi sedikit agar lebih hemat tempat */
-        .word-wrapper { 
-            display: flex; 
-            margin-right: 8px; /* Dikurangi dari 14px */
-            margin-bottom: 10px; 
-            justify-content: center; /* Pastikan kata di tengah wrapper */
-        }
-
-        /* Container Pesan Rahasia */
-        #quote-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center; /* PENTING: Memusatkan seluruh konten */
-            width: 100%;
         }
         
         /* Posisi Tombol Pengaturan */
@@ -184,17 +196,9 @@
             max-height: 200px;
         }
 
-        /* MEDIA QUERIES UNTUK LAYAR LEBIH BESAR */
-        @media (min-width: 360px) {
-            .char-box { width: 32px; } /* HP Standar */
-        }
-        @media (min-width: 400px) {
-            .char-box { width: 36px; margin: 0 2px; } /* HP Besar */
-            .word-wrapper { margin-right: 12px; }
-        }
         @media (min-width: 640px) {
-            .char-box { width: 48px; margin: 0 3px; } /* Tablet/Desktop */
-            .letter-input { font-size: 2.2rem; height: 55px; }
+            .char-box { width: 48px; height: 75px; margin: 0 3px; }
+            .letter-input { font-size: 2.2rem; }
             .level-grid { grid-template-columns: repeat(5, 1fr); max-width: 600px; gap: 20px; }
         }
     </style>
@@ -220,7 +224,7 @@
         </div>
 
         <div class="bg-white/70 backdrop-blur-md p-6 rounded-3xl shadow-xl w-full max-w-2xl border border-white/60">
-            <div id="level-container" class="level-grid">
+            <div id="level-container" class="level-grid overflow-y-auto max-h-[60vh] custom-scroll p-2">
                 <!-- Grid Level digenerate JS -->
             </div>
         </div>
@@ -251,7 +255,6 @@
             <!-- Pesan Rahasia -->
             <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-2xl border border-indigo-100 mb-6 relative shadow-inner">
                 <div class="absolute -top-3 left-4 bg-indigo-500 text-white px-3 py-0.5 rounded-full text-xs font-bold shadow-md">PESAN RAHASIA</div>
-                <!-- Container Flex Wrap Center -->
                 <div id="quote-container" class="flex flex-wrap justify-center mt-3 w-full"></div>
             </div>
 
@@ -362,7 +365,7 @@
         </div>
     </div>
 
-    <!-- MODAL TENTANG (DENGAN KRITIK & SARAN) -->
+    <!-- MODAL TENTANG (UPDATED) -->
     <div id="about-modal" class="modal-overlay hidden-force" style="z-index: 9700;">
         <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full animate-pop relative text-center">
             <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
@@ -430,9 +433,8 @@
     </div>
 
     <script>
-        // --- DATA POOL SOAL (50 LEVEL - VARIED CLUES) ---
+        // --- DATA POOL SOAL ---
         const LEVEL_DATA = [
-            // LEVEL 1-10 (Mudah, 3 Clues)
             { quote: "BHINNEKA TUNGGAL IKA", clues: [{icon:"🦅",q:"Lambang Negara",a:"GARUDA"}, {icon:"🏝️",q:"Pulau Dewata",a:"BALI"}, {icon:"👅",q:"Indra Pengecap",a:"LIDAH"}] },
             { quote: "RAJIN PANGKAL PANDAI", clues: [{icon:"🦁",q:"Raja Hutan",a:"SINGA"}, {icon:"🌧️",q:"Air Langit",a:"HUJAN"}, {icon:"🚪",q:"Akses Masuk",a:"PINTU"}] },
             { quote: "BERAKIT KE HULU", clues: [{icon:"🛶",q:"Perahu Kayu",a:"RAKIT"}, {icon:"🐟",q:"Bernapas Insang",a:"IKAN"}, {icon:"⛰️",q:"Dataran Tinggi",a:"BUKIT"}] },
@@ -443,8 +445,6 @@
             { quote: "SEDIKIT LAMA LAMA MENJADI BUKIT", clues: [{icon:"🐜",q:"Hewan Kecil",a:"SEMUT"}, {icon:"⏳",q:"Penunjuk Waktu",a:"JAM"}, {icon:"🏔️",q:"Gunung Kecil",a:"BUKIT"}] },
             { quote: "BERSATU KITA TEGUH", clues: [{icon:"🤝",q:"Sapaan Tangan",a:"SALAM"}, {icon:"🏠",q:"Tempat Tinggal",a:"RUMAH"}, {icon:"🌳",q:"Tumbuhan Kayu",a:"POHON"}] },
             { quote: "TUT WURI HANDAYANI", clues: [{icon:"🏫",q:"Tempat Belajar",a:"SEKOLAH"}, {icon:"📚",q:"Jendela Dunia",a:"BUKU"}, {icon:"✏️",q:"Alat Tulis",a:"PENSIL"}] },
-            
-            // LEVEL 11-20 (Menengah, 4 Clues)
             { quote: "BERENANG RENANG KE TEPIAN", clues: [{icon:"🏊",q:"Olahraga Air",a:"RENANG"}, {icon:"🏖️",q:"Pinggir Laut",a:"PANTAI"}, {icon:"🐟",q:"Ikan Hias",a:"ARWANA"}, {icon:"🚤",q:"Perahu Cepat",a:"BOAT"}] },
             { quote: "TONG KOSONG NYARING BUNYINYA", clues: [{icon:"🥁",q:"Alat Musik Pukul",a:"DRUM"}, {icon:"🔔",q:"Bunyi Sekolah",a:"BEL"}, {icon:"🦗",q:"Serangga",a:"JANGKRIK"}, {icon:"🎤",q:"Untuk Nyanyi",a:"MIKROFON"}] },
             { quote: "SEDIA PAYUNG SEBELUM HUJAN", clues: [{icon:"☔",q:"Pelindung Hujan",a:"PAYUNG"}, {icon:"🔥",q:"Panas Membara",a:"API"}, {icon:"🌊",q:"Air Asin",a:"LAUT"}, {icon:"☁️",q:"Awan Gelap",a:"MENDUNG"}] },
@@ -455,8 +455,6 @@
             { quote: "PADI MAKIN BERISI MAKIN MERUNDUK", clues: [{icon:"🌾",q:"Bahan Nasi",a:"PADI"}, {icon:"🍚",q:"Makanan Pokok",a:"NASI"}, {icon:"👨‍🌾",q:"Orang Sawah",a:"PETANI"}, {icon:"🚜",q:"Bajak Sawah",a:"TRAKTOR"}] },
             { quote: "ANJING MENGGONGGONG KAFILAH BERLALU", clues: [{icon:"🐕",q:"Hewan Penjaga",a:"ANJING"}, {icon:"🚶",q:"Berjalan Kaki",a:"JALAN"}, {icon:"🐫",q:"Hewan Gurun",a:"UNTA"}, {icon:"🌵",q:"Tanaman Gurun",a:"KAKTUS"}] },
             { quote: "BAGAI PINANG DIBELAH DUA", clues: [{icon:"🌴",q:"Pohon Sejenis",a:"PINANG"}, {icon:"✌️",q:"Angka Jari",a:"DUA"}, {icon:"🔪",q:"Alat Potong",a:"PISAU"}, {icon:"🥥",q:"Isi Es Doger",a:"KELAPA"}] },
-
-            // LEVEL 21-30 (Menengah, 4 Clues)
             { quote: "SEPERTI AIR DENGAN MINYAK", clues: [{icon:"💧",q:"Cairan Kehidupan",a:"AIR"}, {icon:"🍳",q:"Untuk Goreng",a:"MINYAK"}, {icon:"🔥",q:"Lawan Air",a:"API"}, {icon:"🕯️",q:"Penerang Lilin",a:"CAHAYA"}] },
             { quote: "KEBERSIHAN SEBAGIAN DARI IMAN", clues: [{icon:"🧹",q:"Alat Menyapu",a:"SAPU"}, {icon:"🗑️",q:"Tempat Buang",a:"SAMPAH"}, {icon:"🚿",q:"Mandi",a:"SABUN"}, {icon:"🕌",q:"Tempat Ibadah",a:"MASJID"}] },
             { quote: "MALU BERTANYA SESAT DI JALAN", clues: [{icon:"🤔",q:"Sedang Bingung",a:"TANYA"}, {icon:"🗺️",q:"Penunjuk Arah",a:"PETA"}, {icon:"🛣️",q:"Jalan Tol",a:"JALAN"}, {icon:"🧭",q:"Arah Utara",a:"KOMPAS"}] },
@@ -467,8 +465,6 @@
             { quote: "SENJATA MAKAN TUAN", clues: [{icon:"🔫",q:"Alat Perang",a:"SENJATA"}, {icon:"🍽️",q:"Aktivitas Mulut",a:"MAKAN"}, {icon:"🤴",q:"Raja",a:"TUAN"}, {icon:"🛡️",q:"Pelindung",a:"TAMENG"}] },
             { quote: "SETALI TIGA UANG", clues: [{icon:"💰",q:"Alat Tukar",a:"UANG"}, {icon:"3️⃣",q:"Angka Ganjil",a:"TIGA"}, {icon:"🪙",q:"Uang Logam",a:"KOIN"}, {icon:"💵",q:"Uang Kertas",a:"LEMBAR"}] },
             { quote: "SUDAH JATUH TERTIMPA TANGGA", clues: [{icon:"🪜",q:"Alat Panjat",a:"TANGGA"}, {icon:"🤕",q:"Sakit Kepala",a:"PUSING"}, {icon:"⬇️",q:"Arah Bawah",a:"TURUN"}, {icon:"🩹",q:"P3K",a:"PERBAN"}] },
-
-            // LEVEL 31-40 (Sulit, 5 Clues)
             { quote: "TAK ADA GADING YANG TAK RETAK", clues: [{icon:"🐘",q:"Hewan Belalai",a:"GAJAH"}, {icon:"🦴",q:"Bagian Keras",a:"TULANG"}, {icon:"🥚",q:"Mudah Pecah",a:"TELUR"}, {icon:"🔨",q:"Pukul Paku",a:"PALU"}, {icon:"🦷",q:"Gigi Putih",a:"GADING"}] },
             { quote: "AIR SUSU DIBALAS AIR TUBA", clues: [{icon:"🥛",q:"Minuman Sehat",a:"SUSU"}, {icon:"🐄",q:"Penghasil Susu",a:"SAPI"}, {icon:"☠️",q:"Tanda Bahaya",a:"RACUN"}, {icon:"🍼",q:"Botol Bayi",a:"DOT"}, {icon:"🧪",q:"Cairan Kimia",a:"TUBA"}] },
             { quote: "JAUH DI MATA DEKAT DI HATI", clues: [{icon:"👀",q:"Indra Penglihat",a:"MATA"}, {icon:"❤️",q:"Organ Perasa",a:"HATI"}, {icon:"🔭",q:"Melihat Jauh",a:"TEROPONG"}, {icon:"👓",q:"Alat Baca",a:"KACAMATA"}, {icon:"💓",q:"Detak",a:"JANTUNG"}] },
@@ -479,8 +475,6 @@
             { quote: "LAIN LADANG LAIN BELALANG", clues: [{icon:"🦗",q:"Serangga Hijau",a:"BELALANG"}, {icon:"🌾",q:"Tempat Tanam",a:"LADANG"}, {icon:"🐟",q:"Lain Lubuk...",a:"IKAN"}, {icon:"🦋",q:"Serangga Cantik",a:"KUPU"}, {icon:"🐛",q:"Ulat",a:"KEPOMPONG"}] },
             { quote: "SAMBIL MENYELAM MINUM AIR", clues: [{icon:"🤿",q:"Berenang Dalam",a:"SELAM"}, {icon:"🥤",q:"Melepas Dahaga",a:"MINUM"}, {icon:"💧",q:"Zat Cair",a:"AIR"}, {icon:"🌊",q:"Ombak",a:"GELOMBANG"}, {icon:"🐟",q:"Bernapas Air",a:"INSANG"}] },
             { quote: "SIAPA CEPAT DIA DAPAT", clues: [{icon:"🏃",q:"Lari Kencang",a:"CEPAT"}, {icon:"🎁",q:"Terima Sesuatu",a:"DAPAT"}, {icon:"🥇",q:"Juara Satu",a:"EMAS"}, {icon:"🏎️",q:"Balapan",a:"RACING"}, {icon:"⏱️",q:"Waktu",a:"DETIK"}] },
-
-            // LEVEL 41-50 (Sangat Sulit, 5 Clues)
             { quote: "TIADA ROTAN AKAR PUN JADI", clues: [{icon:"🪑",q:"Kursi Anyam",a:"ROTAN"}, {icon:"🌳",q:"Bawah Pohon",a:"AKAR"}, {icon:"🪵",q:"Batang",a:"KAYU"}, {icon:"🌿",q:"Tanaman",a:"TUMBUHAN"}, {icon:"🎋",q:"Bambu",a:"BULUH"}] },
             { quote: "BAGAI AIR DI DAUN TALAS", clues: [{icon:"🍃",q:"Bagian Tanaman",a:"DAUN"}, {icon:"💧",q:"Benda Cair",a:"AIR"}, {icon:"🌱",q:"Tanaman Umbi",a:"TALAS"}, {icon:"☔",q:"Anti Air",a:"KALIS"}, {icon:"🌿",q:"Hijau",a:"KLOROFIL"}] },
             { quote: "BURUK MUKA CERMIN DIBELAH", clues: [{icon:"🪞",q:"Alat Berkaca",a:"CERMIN"}, {icon:"🪓",q:"Membelah Kayu",a:"KAPAK"}, {icon:"😡",q:"Wajah Marah",a:"MUKA"}, {icon:"👹",q:"Seram",a:"HANTU"}, {icon:"💔",q:"Patah Hati",a:"RETAK"}] },
@@ -828,7 +822,6 @@
                     // Level 50 Selesai (Tamat)
                     msg.innerText = "Selamat! Kamu menamatkan semua level!"; 
                     btnNext.classList.add('hidden-force'); 
-                    // Redirect ke halaman tamat setelah delay
                     setTimeout(() => window.location.href = "tamat_preview.html", 3000);
                 }
                 else if (totalStars >= nextLevelReq) { msg.innerText = "Hebat! Level selanjutnya terbuka."; btnNext.classList.remove('hidden-force'); } 
