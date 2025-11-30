@@ -25,7 +25,7 @@
         /* --- LEVEL SELECT STYLES --- */
         .level-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
             gap: 12px;
             max-width: 500px;
             margin: 0 auto;
@@ -39,7 +39,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: #4b5563;
             cursor: pointer;
@@ -50,21 +50,13 @@
         }
 
         .level-box:active { transform: translateY(2px); border-bottom-width: 0px; margin-top: 4px; }
-        
-        .level-box.locked { 
-            background: #f3f4f6; 
-            color: #9ca3af; 
-            cursor: not-allowed; 
-            border-bottom-color: #d1d5db; 
-            border: 2px solid #e5e7eb;
-        }
-        
+        .level-box.locked { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; border-bottom-color: #d1d5db; border: 2px solid #e5e7eb; }
         .level-box.unlocked { background: #fff; border: 2px solid #d946ef; border-bottom: 4px solid #c026d3; color: #d946ef; }
         .level-box.completed { background: #dcfce7; border-color: #22c55e; color: #15803d; }
 
         .stars-container { display: flex; gap: 2px; margin-top: 2px; font-size: 0.6rem; }
 
-        /* --- GAME INPUT STYLES --- */
+        /* --- GAME INPUT STYLES (PERBAIKAN RESPONSIVE) --- */
         .game-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
 
         .letter-input {
@@ -75,9 +67,10 @@
             text-transform: uppercase;
             color: #d946ef;
             font-weight: bold;
-            font-size: 1.6rem;
+            /* Font size dinamis agar pas di kotak kecil */
+            font-size: 1.4rem; 
             width: 100%;
-            height: 45px;
+            height: 40px; /* Sedikit dikecilkan untuk HP kecil */
             padding: 0;
             margin: 0;
             transition: all 0.2s;
@@ -99,7 +92,6 @@
         .star-anim:nth-child(2) { animation-delay: 0.4s; }
         .star-anim:nth-child(3) { animation-delay: 0.6s; }
 
-        /* Animasi Bintang Terbang */
         @keyframes flyStar {
             0% { transform: scale(1); opacity: 1; }
             100% { transform: scale(0.2); opacity: 0; }
@@ -121,8 +113,31 @@
             backdrop-filter: blur(4px);
         }
 
-        .char-box { width: 34px; margin: 0 1px; display: flex; flex-direction: column; align-items: center; }
-        .word-wrapper { display: flex; margin-right: 14px; margin-bottom: 10px; }
+        /* --- PERBAIKAN UTAMA DI SINI --- */
+        /* Menggunakan ukuran dinamis (vw) untuk layar sangat kecil agar kata panjang muat */
+        .char-box { 
+            width: 28px; /* Default lebih kecil untuk HP sempit */
+            margin: 0 1px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        
+        /* Margin antar kata dikurangi sedikit agar lebih hemat tempat */
+        .word-wrapper { 
+            display: flex; 
+            margin-right: 8px; /* Dikurangi dari 14px */
+            margin-bottom: 10px; 
+            justify-content: center; /* Pastikan kata di tengah wrapper */
+        }
+
+        /* Container Pesan Rahasia */
+        #quote-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* PENTING: Memusatkan seluruh konten */
+            width: 100%;
+        }
         
         /* Posisi Tombol Pengaturan */
         #settings-btn {
@@ -169,8 +184,16 @@
             max-height: 200px;
         }
 
+        /* MEDIA QUERIES UNTUK LAYAR LEBIH BESAR */
+        @media (min-width: 360px) {
+            .char-box { width: 32px; } /* HP Standar */
+        }
+        @media (min-width: 400px) {
+            .char-box { width: 36px; margin: 0 2px; } /* HP Besar */
+            .word-wrapper { margin-right: 12px; }
+        }
         @media (min-width: 640px) {
-            .char-box { width: 48px; margin: 0 3px; }
+            .char-box { width: 48px; margin: 0 3px; } /* Tablet/Desktop */
             .letter-input { font-size: 2.2rem; height: 55px; }
             .level-grid { grid-template-columns: repeat(5, 1fr); max-width: 600px; gap: 20px; }
         }
@@ -228,7 +251,8 @@
             <!-- Pesan Rahasia -->
             <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-2xl border border-indigo-100 mb-6 relative shadow-inner">
                 <div class="absolute -top-3 left-4 bg-indigo-500 text-white px-3 py-0.5 rounded-full text-xs font-bold shadow-md">PESAN RAHASIA</div>
-                <div id="quote-container" class="flex flex-wrap justify-center mt-3"></div>
+                <!-- Container Flex Wrap Center -->
+                <div id="quote-container" class="flex flex-wrap justify-center mt-3 w-full"></div>
             </div>
 
             <!-- Petunjuk -->
@@ -338,7 +362,7 @@
         </div>
     </div>
 
-    <!-- MODAL TENTANG (UPDATED) -->
+    <!-- MODAL TENTANG (DENGAN KRITIK & SARAN) -->
     <div id="about-modal" class="modal-overlay hidden-force" style="z-index: 9700;">
         <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full animate-pop relative text-center">
             <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
@@ -406,7 +430,7 @@
     </div>
 
     <script>
-        // --- DATA POOL (50 LEVEL - VARIED CLUES) ---
+        // --- DATA POOL SOAL (50 LEVEL - VARIED CLUES) ---
         const LEVEL_DATA = [
             // LEVEL 1-10 (Mudah, 3 Clues)
             { quote: "BHINNEKA TUNGGAL IKA", clues: [{icon:"🦅",q:"Lambang Negara",a:"GARUDA"}, {icon:"🏝️",q:"Pulau Dewata",a:"BALI"}, {icon:"👅",q:"Indra Pengecap",a:"LIDAH"}] },
@@ -521,7 +545,6 @@
 
         const bgm = new Audio("https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3");
         bgm.loop = true;
-        
         function updateBgmVolume() { if (audioPrefs.isMuted) bgm.volume = 0; else bgm.volume = (audioPrefs.bgmVolume / 100) * 0.4; }
 
         document.addEventListener('click', (event) => {
@@ -801,7 +824,13 @@
                 emoji.innerText = "🎉"; document.getElementById('result-title').innerText = "LEVEL SELESAI!"; document.getElementById('result-title').className = "text-2xl font-bold text-green-600 mb-2";
                 if(userProgress.unlockedLevel < levelNum + 1 && levelNum < 50) userProgress.unlockedLevel = levelNum + 1;
                 
-                if(levelNum === 50) { msg.innerText = "Selamat! Kamu menamatkan semua level!"; btnNext.classList.add('hidden-force'); }
+                if(levelNum === 50) { 
+                    // Level 50 Selesai (Tamat)
+                    msg.innerText = "Selamat! Kamu menamatkan semua level!"; 
+                    btnNext.classList.add('hidden-force'); 
+                    // Redirect ke halaman tamat setelah delay
+                    setTimeout(() => window.location.href = "tamat_preview.html", 3000);
+                }
                 else if (totalStars >= nextLevelReq) { msg.innerText = "Hebat! Level selanjutnya terbuka."; btnNext.classList.remove('hidden-force'); } 
                 else { msg.innerText = `Level ${levelNum+1} butuh total ${nextLevelReq} ⭐.`; btnNext.classList.add('hidden-force'); }
                 
