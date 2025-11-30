@@ -237,14 +237,24 @@
             </div>
 
             <!-- Footer Controls -->
-            <div class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur px-6 py-4 rounded-b-[2rem] border-t border-gray-100 flex justify-between items-center z-20 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-                <div class="flex flex-col">
-                    <span class="text-xs text-gray-400 font-bold uppercase">Kesalahan</span>
-                    <span id="mistake-counter" class="text-2xl font-bold text-gray-700">0</span>
+            <div class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur px-4 py-4 rounded-b-[2rem] border-t border-gray-100 flex justify-between items-center z-20 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+                
+                <!-- Info Kesalahan -->
+                <div class="flex flex-col mr-2">
+                    <span class="text-[10px] text-gray-400 font-bold uppercase">Salah</span>
+                    <span id="mistake-counter" class="text-xl font-bold text-gray-700">0</span>
                 </div>
-                <button onclick="checkAnswer()" class="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-purple-500/40 hover:-translate-y-1 active:scale-95 transition flex items-center gap-2">
-                    CEK JAWABAN <i class="fa-solid fa-check"></i>
-                </button>
+
+                <!-- Tombol Bantuan -->
+                <div class="flex gap-2">
+                    <button id="hint-btn" onclick="useHint()" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-full font-bold shadow-lg active:scale-95 transition flex items-center gap-1">
+                        <i class="fa-solid fa-lightbulb"></i> <span id="hint-count">5</span>
+                    </button>
+
+                    <button onclick="checkAnswer()" class="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-2 rounded-full font-bold shadow-lg hover:shadow-purple-500/40 hover:-translate-y-1 active:scale-95 transition flex items-center gap-2 text-sm md:text-base">
+                        CEK <i class="fa-solid fa-check"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -262,7 +272,7 @@
             <h3 class="font-bold text-2xl text-gray-800 mb-6 border-b pb-2">Pengaturan</h3>
             
             <div class="space-y-3">
-                <!-- Section Audio -->
+                <!-- Section Audio (Accordion) -->
                 <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
                     <button id="audio-accordion-btn" class="w-full flex items-center justify-between p-3 bg-white hover:bg-gray-50 transition border-b border-gray-100">
                         <div class="flex items-center gap-2">
@@ -312,7 +322,7 @@
         </div>
     </div>
 
-    <!-- Modal Info & About (Same as before) -->
+    <!-- Modal Info & About -->
     <div id="info-modal" class="modal-overlay hidden-force" style="z-index: 9600;">
         <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full animate-pop relative">
             <button onclick="closeInfoModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
@@ -328,6 +338,7 @@
         </div>
     </div>
 
+    <!-- MODAL TENTANG (UPDATED) -->
     <div id="about-modal" class="modal-overlay hidden-force" style="z-index: 9700;">
         <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full animate-pop relative text-center">
             <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
@@ -339,7 +350,13 @@
                 <div class="flex justify-between"><span class="text-gray-400">Asal</span><span class="font-bold text-gray-800 text-right">Sumatera Utara,<br>Indonesia 🇮🇩</span></div>
                 <div class="flex justify-between"><span class="text-gray-400">Rilis</span><span class="font-bold text-gray-800">2025</span></div>
             </div>
-            <div class="mt-6 text-xs text-gray-400">Terima kasih telah bermain!<br>Dibuat dengan ❤️ untuk edukasi.</div>
+            
+            <!-- TOMBOL WA (BARU) -->
+            <a href="https://wa.me/6282275894842?text=Saya%20sudah%20memainkan%20permainan%20Sandi%20Kata.%20Saya%20ingin%20membuat%20kritik%20dan%20saran%3A...." target="_blank" class="mt-6 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm w-full transition shadow-md">
+                <i class="fa-brands fa-whatsapp text-lg"></i> Kritik & Saran
+            </a>
+
+            <div class="mt-4 text-xs text-gray-400">Terima kasih telah bermain!<br>Dibuat dengan ❤️ untuk edukasi.</div>
         </div>
     </div>
 
@@ -349,9 +366,7 @@
             <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#FFD700 2px, transparent 2px); background-size: 20px 20px;"></div>
             <div id="result-emoji" class="text-7xl mb-2 filter drop-shadow-md">🎉</div>
             <h2 id="result-title" class="text-2xl font-bold text-gray-800 mb-1">LEVEL SELESAI</h2>
-            <!-- Container Bintang Popup -->
-            <div class="flex justify-center gap-2 mb-4 text-4xl py-2 relative" id="modal-stars"></div>
-            
+            <div class="flex justify-center gap-2 mb-4 text-4xl py-2" id="modal-stars"></div>
             <p id="result-msg" class="text-gray-500 mb-6 text-sm font-medium">Kamu butuh minimal 2 bintang untuk lanjut.</p>
             <div class="flex flex-col gap-3">
                 <button id="btn-next-level" onclick="nextLevel()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition hidden-force">Lanjut Level Berikutnya <i class="fa-solid fa-forward ml-1"></i></button>
@@ -381,17 +396,17 @@
     <div id="reset-modal" class="modal-overlay hidden-force" style="z-index: 120;">
         <div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop border-t-4 border-red-500">
             <div class="text-5xl mb-3">⚠️</div>
-            <h3 class="font-bold text-xl text-gray-800 mb-2">Hapus Semua Data?</h3>
+            <h3 class="font-bold text-xl text-gray-800">Hapus Semua Data?</h3>
             <p class="text-gray-500 text-sm mb-6">Progress level dan bintang akan hilang permanen.</p>
             <div class="flex gap-3">
-                <button onclick="closeResetModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold hover:bg-gray-300 transition">Batal</button>
-                <button onclick="confirmReset()" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-bold hover:bg-red-600 transition shadow-md">Hapus</button>
+                <button onclick="closeResetModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold">Batal</button>
+                <button onclick="confirmReset()" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-bold">Hapus</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA POOL SOAL ---
+        // --- DATA POOL ---
         const LEVEL_DATA = [
             { quote: "BHINNEKA TUNGGAL IKA", clues: [{icon:"🦅",q:"Lambang Negara",a:"GARUDA"}, {icon:"🏝️",q:"Pulau Dewata",a:"BALI"}, {icon:"👅",q:"Indra Pengecap",a:"LIDAH"}] },
             { quote: "RAJIN PANGKAL PANDAI", clues: [{icon:"🦁",q:"Raja Hutan",a:"SINGA"}, {icon:"🌧️",q:"Air Langit",a:"HUJAN"}, {icon:"🚪",q:"Akses Masuk",a:"PINTU"}] },
@@ -410,6 +425,8 @@
         let audioPrefs = JSON.parse(localStorage.getItem('sandiKataAudio')) || { isMuted: false, bgmVolume: 20, sfxVolume: 80 };
         let currentLevelIdx = 0, currentMistakes = 0, charToNumberMap = {};
         let audioCtx = null;
+        let hintsRemaining = 5;
+        let lastFocusedInput = null;
 
         // --- AUDIO ENGINE ---
         function initAudioEngine() { if(!audioCtx) { const AudioContext = window.AudioContext || window.webkitAudioContext; audioCtx = new AudioContext(); } if(audioCtx.state === 'suspended') audioCtx.resume(); }
@@ -423,38 +440,16 @@
         }
         function playClickSound() { playTone(800, 'sine', 0.1, 0.4); } 
         function playTypeSound() { playTone(1200, 'square', 0.05, 0.2); } 
-        function playBuzzer() {
-            if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume / 100; const finalVol = 0.5 * sfxGain; if(finalVol <= 0.01) return;
-            const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(80, now + 0.3); gain.gain.setValueAtTime(finalVol, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.3); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now + 0.3);
-        }
-        function playNotification() {
-            if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume / 100; const finalVol = 0.4 * sfxGain; if(finalVol <= 0.01) return;
-            const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine';
-            osc.frequency.setValueAtTime(500, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1); gain.gain.setValueAtTime(finalVol, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now + 0.5);
-        }
-        function playDeleteSound() {
-            if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume / 100; const finalVol = 0.4 * sfxGain; if(finalVol <= 0.01) return;
-            const now = audioCtx.currentTime; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.2); gain.gain.setValueAtTime(finalVol, now);
-            gain.gain.linearRampToValueAtTime(0.01, now + 0.2); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now + 0.2);
-        }
-        function playWinTune() {
-            if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume / 100; const vol = 0.4 * sfxGain; if(vol <= 0.01) return;
-            const now = audioCtx.currentTime; playTone(523.25, 'sine', 0.15, vol, now); playTone(659.25, 'sine', 0.15, vol, now + 0.1); 
-            playTone(783.99, 'sine', 0.15, vol, now + 0.2); playTone(1046.50, 'sine', 0.4, vol, now + 0.3); 
-        }
-        function playAlertSound() {
-            if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume / 100; const vol = 0.3 * sfxGain; if(vol <= 0.01) return;
-            const now = audioCtx.currentTime; playTone(600, 'square', 0.1, vol, now); playTone(600, 'square', 0.1, vol, now + 0.15);
-        }
-        function playPopSound() { if(audioPrefs.isMuted || !audioCtx) return; playTone(700, 'triangle', 0.05, 0.3); }
+        function playBuzzer() { if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume/100; const now=audioCtx.currentTime; const osc=audioCtx.createOscillator(); const gain=audioCtx.createGain(); osc.type='sawtooth'; osc.frequency.setValueAtTime(150,now); osc.frequency.linearRampToValueAtTime(80,now+0.3); gain.gain.setValueAtTime(0.5*sfxGain,now); gain.gain.linearRampToValueAtTime(0.01,now+0.3); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now+0.3); }
+        function playNotification() { if(audioPrefs.isMuted || !audioCtx) return; const sfxGain = audioPrefs.sfxVolume/100; const now=audioCtx.currentTime; const osc=audioCtx.createOscillator(); const gain=audioCtx.createGain(); osc.type='sine'; osc.frequency.setValueAtTime(500,now); osc.frequency.exponentialRampToValueAtTime(1000,now+0.1); gain.gain.setValueAtTime(0.4*sfxGain,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now+0.5); }
+        function playDeleteSound() { if(audioPrefs.isMuted || !audioCtx) return; const sfxGain=audioPrefs.sfxVolume/100; const now=audioCtx.currentTime; const osc=audioCtx.createOscillator(); const gain=audioCtx.createGain(); osc.frequency.setValueAtTime(400,now); osc.frequency.exponentialRampToValueAtTime(100,now+0.2); gain.gain.setValueAtTime(0.4*sfxGain,now); gain.gain.linearRampToValueAtTime(0.01,now+0.2); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(now+0.2); }
+        function playWinTune() { if(audioPrefs.isMuted||!audioCtx) return; const sfxGain=audioPrefs.sfxVolume/100; const vol=0.4*sfxGain; if(vol<=0.01) return; const now=audioCtx.currentTime; playTone(523.25,'sine',0.15,vol,now); playTone(659.25,'sine',0.15,vol,now+0.1); playTone(783.99,'sine',0.15,vol,now+0.2); playTone(1046.50,'sine',0.4,vol,now+0.3); }
+        function playAlertSound() { if(audioPrefs.isMuted||!audioCtx) return; const sfxGain=audioPrefs.sfxVolume/100; const vol=0.3*sfxGain; if(vol<=0.01) return; const now=audioCtx.currentTime; playTone(600,'square',0.1,vol,now); playTone(600,'square',0.1,vol,now+0.15); }
+        function playPopSound() { if(audioPrefs.isMuted||!audioCtx) return; playTone(700,'triangle',0.05,0.3); }
+        function playUnlockSound() { if(audioPrefs.isMuted||!audioCtx) return; const sfxGain=audioPrefs.sfxVolume/100; const now=audioCtx.currentTime; playTone(1200,'sine',0.1,0.4*sfxGain,now); playTone(1500,'sine',0.2,0.4*sfxGain,now+0.1); }
 
         const bgm = new Audio("https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3");
         bgm.loop = true;
-        
         function updateBgmVolume() { if (audioPrefs.isMuted) bgm.volume = 0; else bgm.volume = (audioPrefs.bgmVolume / 100) * 0.4; }
 
         document.addEventListener('click', (event) => {
@@ -464,8 +459,7 @@
         });
 
         window.onload = function() {
-            renderLevelGrid(); // Ini akan memperbarui total bintang di pojok kiri
-            
+            renderLevelGrid();
             document.getElementById('bgm-slider').value = audioPrefs.bgmVolume;
             document.getElementById('bgm-val-display').innerText = audioPrefs.bgmVolume + '%';
             document.getElementById('sfx-slider').value = audioPrefs.sfxVolume;
@@ -477,7 +471,7 @@
 
         function saveAudioPrefs() { localStorage.setItem('sandiKataAudio', JSON.stringify(audioPrefs)); }
 
-        // --- UI UTILS & MODALS ---
+        // --- SETTINGS LOGIC ---
         function openSettings() { playPopSound(); document.getElementById('settings-modal').classList.remove('hidden-force'); }
         function closeSettings() { playPopSound(); document.getElementById('settings-modal').classList.add('hidden-force'); }
         function openInfoModal() { playPopSound(); document.getElementById('info-modal').classList.remove('hidden-force'); }
@@ -485,10 +479,8 @@
         function openAboutModal() { playPopSound(); document.getElementById('about-modal').classList.remove('hidden-force'); }
         function closeAboutModal() { playPopSound(); document.getElementById('about-modal').classList.add('hidden-force'); }
 
-        const bgmSlider = document.getElementById('bgm-slider');
-        const sfxSlider = document.getElementById('sfx-slider');
-        const audioAccordionBtn = document.getElementById('audio-accordion-btn');
-        const audioSlidersPanel = document.getElementById('audio-sliders-panel');
+        const bgmSlider = document.getElementById('bgm-slider'); const sfxSlider = document.getElementById('sfx-slider');
+        const audioAccordionBtn = document.getElementById('audio-accordion-btn'); const audioSlidersPanel = document.getElementById('audio-sliders-panel');
         const masterMuteToggle = document.getElementById('master-mute-toggle');
 
         audioAccordionBtn.addEventListener('click', (e) => {
@@ -500,7 +492,6 @@
         bgmSlider.addEventListener('input', function() { audioPrefs.bgmVolume = this.value; document.getElementById('bgm-val-display').innerText = this.value + '%'; updateBgmVolume(); saveAudioPrefs(); });
         sfxSlider.addEventListener('input', function() { audioPrefs.sfxVolume = this.value; document.getElementById('sfx-val-display').innerText = this.value + '%'; saveAudioPrefs(); });
         sfxSlider.addEventListener('change', function() { playTypeSound(); });
-
         masterMuteToggle.addEventListener('change', (e) => { e.stopPropagation(); toggleMuteState(); });
 
         function toggleMuteState() {
@@ -509,69 +500,54 @@
             else { updateBgmVolume(); bgm.play().catch(() => {}); playNotification(); document.getElementById('master-mute-toggle').checked = true; }
             saveAudioPrefs();
         }
-
-        function updateAudioIconUI() {
-            const iconMain = document.getElementById('audio-icon-main');
-            if(audioPrefs.isMuted) iconMain.className = "fa-solid fa-volume-xmark text-red-400 text-lg";
-            else iconMain.className = "fa-solid fa-volume-high text-green-500 text-lg";
-        }
+        function updateAudioIconUI() { const iconMain = document.getElementById('audio-icon-main'); if(audioPrefs.isMuted) iconMain.className = "fa-solid fa-volume-xmark text-red-400 text-lg"; else iconMain.className = "fa-solid fa-volume-high text-green-500 text-lg"; }
 
         // --- LEVEL LOGIC ---
         function renderLevelGrid() {
             const totalStars = Object.values(userProgress.stars).reduce((a, b) => a + b, 0);
             document.getElementById('total-stars-fixed').innerText = totalStars;
-
-            const container = document.getElementById('level-container');
-            container.innerHTML = '';
-            
-            for (let i = 1; i <= 10; i++) {
-                const box = document.createElement('div');
-                const starsCount = userProgress.stars[i] || 0;
-                
-                const requiredStars = (i === 1) ? 0 : (i - 1) * 2;
-                const isUnlocked = totalStars >= requiredStars;
-
-                let classes = "level-box";
-                let content = "";
-
+            const container = document.getElementById('level-container'); container.innerHTML = '';
+            for (let i = 1; i <= 50; i++) {
+                const box = document.createElement('div'); const starsCount = userProgress.stars[i] || 0;
+                const requiredStars = (i === 1) ? 0 : (i - 1) * 2; const isUnlocked = totalStars >= requiredStars;
+                let classes = "level-box"; let content = "";
                 if (!isUnlocked) {
                     classes += " locked";
-                    content = `
-                        <span class="text-gray-400 text-lg">${i}</span>
-                        <div class="flex flex-col items-center text-gray-400 mt-1">
-                            <i class="fa-solid fa-lock text-xs"></i>
-                            <span class="text-[9px] leading-tight mt-0.5">Butuh ${requiredStars}⭐</span>
-                        </div>
-                    `;
+                    content = `<span class="text-gray-400 text-lg">${i}</span><div class="flex flex-col items-center text-gray-400 mt-1"><i class="fa-solid fa-lock text-xs"></i><span class="text-[9px] leading-tight mt-0.5">Butuh ${requiredStars}⭐</span></div>`;
                 } else {
                     if (starsCount > 0) classes += " unlocked completed"; else classes += " unlocked";
-                    let starsHtml = '';
-                    for(let s=1; s<=3; s++) starsHtml += `<i class="fa-solid fa-star ${s <= starsCount ? 'text-yellow-400' : 'text-gray-300'}"></i>`;
+                    let starsHtml = ''; for(let s=1; s<=3; s++) starsHtml += `<i class="fa-solid fa-star ${s <= starsCount ? 'text-yellow-400' : 'text-gray-300'}"></i>`;
                     content = `<span>${i}</span><div class="stars-container">${starsHtml}</div>`;
                     box.onclick = (e) => { e.stopPropagation(); loadLevel(i); };
                 }
-                
-                box.className = classes;
-                box.innerHTML = content;
-                container.appendChild(box);
+                box.className = classes; box.innerHTML = content; container.appendChild(box);
             }
         }
 
         function updateTotalStarsUI() {
-            // Helper function to update just the star count without re-rendering grid
             const totalStars = Object.values(userProgress.stars).reduce((a, b) => a + b, 0);
             document.getElementById('total-stars-fixed').innerText = totalStars;
         }
 
         function loadLevel(levelNum) {
             currentLevelIdx = levelNum - 1;
-            let hintsCount = 0; let diffLabel = "";
-            if (levelNum <= 3) { hintsCount = 2; diffLabel = "Mudah (2 Bantuan)"; } 
-            else if (levelNum <= 7) { hintsCount = 1; diffLabel = "Sedang (1 Bantuan)"; } 
-            else { hintsCount = 0; diffLabel = "Sulit (Tanpa Bantuan)"; }
+            hintsRemaining = 5; 
+            document.getElementById('hint-count').innerText = hintsRemaining;
+            document.getElementById('hint-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            let diffLabel = "";
+            let autoHints = 0;
+
+            if (levelNum <= 10) { diffLabel = "Mudah (2 Bantuan)"; autoHints = 2; } 
+            else if (levelNum <= 30) { diffLabel = "Sedang (1 Bantuan)"; autoHints = 1; } 
+            else { diffLabel = "Sulit (0 Bantuan)"; autoHints = 0; }
+
             const badge = document.getElementById('difficulty-badge');
             badge.innerText = diffLabel;
-            badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 ${levelNum<=3 ? 'bg-green-100 text-green-600' : levelNum<=7 ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'}`;
+            if(levelNum <= 10) badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 bg-green-100 text-green-600`;
+            else if(levelNum <= 30) badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 bg-yellow-100 text-yellow-600`;
+            else badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 bg-red-100 text-red-600`;
+
             const levelData = LEVEL_DATA[currentLevelIdx % LEVEL_DATA.length];
             document.getElementById('home-screen').classList.add('hidden-force');
             document.getElementById('game-screen').classList.remove('hidden-force');
@@ -582,7 +558,7 @@
             currentMistakes = 0;
             generateMapping(levelData);
             renderGame(levelData);
-            if(hintsCount > 0) revealRandomHint(hintsCount);
+            if(autoHints > 0) revealRandomHint(autoHints);
         }
 
         function generateMapping(data) {
@@ -595,8 +571,7 @@
         }
 
         function renderGame(data) {
-            const qContainer = document.getElementById('quote-container');
-            const cContainer = document.getElementById('clues-container');
+            const qContainer = document.getElementById('quote-container'); const cContainer = document.getElementById('clues-container');
             qContainer.innerHTML = ''; cContainer.innerHTML = '';
             data.quote.split(' ').forEach(word => {
                 const wrap = document.createElement('div'); wrap.className = 'word-wrapper';
@@ -623,7 +598,7 @@
             div.innerHTML = `<input type="text" maxlength="1" class="letter-input" data-number="${num}" data-real="${char}" autocomplete="off" inputmode="text"><span class="text-[0.7rem] font-bold text-gray-400 mt-1">${num}</span>`;
             const inp = div.querySelector('input');
             inp.addEventListener('input', (e) => handleInput(e, inp));
-            inp.addEventListener('focus', () => highlightBoxes(num, true));
+            inp.addEventListener('focus', (e) => { lastFocusedInput = inp; highlightBoxes(num, true); });
             inp.addEventListener('blur', () => highlightBoxes(num, false));
             inp.addEventListener('keydown', (e) => handleNav(e, inp));
             inp.addEventListener('click', function(e) { e.stopPropagation(); if(!this.classList.contains('locked')) this.select(); });
@@ -646,12 +621,32 @@
             }, 500);
         }
 
+        // --- HINT FUNCTION ---
+        function useHint() {
+            if (hintsRemaining <= 0) { showInfoPopup("Bantuan sudah habis!"); return; }
+            let targetChar = null;
+            if (lastFocusedInput && !lastFocusedInput.classList.contains('locked') && lastFocusedInput.value === "") {
+                targetChar = lastFocusedInput.dataset.real;
+            } else {
+                const emptyInputs = Array.from(document.querySelectorAll('.letter-input')).filter(inp => !inp.classList.contains('locked') && inp.value === "");
+                if (emptyInputs.length > 0) { const randomInput = emptyInputs[Math.floor(Math.random() * emptyInputs.length)]; targetChar = randomInput.dataset.real; }
+            }
+            if (targetChar) {
+                hintsRemaining--; document.getElementById('hint-count').innerText = hintsRemaining;
+                if(hintsRemaining === 0) document.getElementById('hint-btn').classList.add('opacity-50', 'cursor-not-allowed');
+                const num = charToNumberMap[targetChar];
+                document.querySelectorAll(`.letter-input[data-number="${num}"]`).forEach(inp => {
+                    inp.value = targetChar; inp.classList.add('locked'); inp.classList.remove('animate-pop'); void inp.offsetWidth; inp.classList.add('animate-pop');
+                });
+                playUnlockSound();
+            } else { showInfoPopup("Semua kotak sudah terisi!"); }
+        }
+
         // --- SMART SKIP & INPUT LOGIC ---
         function handleInput(e, el) {
             e.stopPropagation(); let val = e.target.value.toUpperCase();
             if(!/^[A-Z]$/.test(val)) { if(val === "") syncInputs(el.dataset.number, ""); else el.value = ""; return; }
-            playTypeSound(); syncInputs(el.dataset.number, val); 
-            focusNextUnlockedInput(el);
+            playTypeSound(); syncInputs(el.dataset.number, val); focusNextUnlockedInput(el);
         }
         
         function focusNextUnlockedInput(currentInput) {
@@ -659,20 +654,13 @@
             const inputs = Array.from(wrapper.querySelectorAll('.letter-input')); const currIdx = inputs.indexOf(currentInput);
             for(let i = currIdx + 1; i < inputs.length; i++) {
                 // SKIP jika LOCKED atau SUDAH ADA ISI
-                if(!inputs[i].classList.contains('locked') && inputs[i].value === "") { 
-                    inputs[i].focus(); 
-                    // inputs[i].select(); // Optional, removed for smoother skip on mobile
-                    return; 
-                }
+                if(!inputs[i].classList.contains('locked') && inputs[i].value === "") { inputs[i].focus(); return; }
             }
         }
 
         function syncInputs(num, char) {
             document.querySelectorAll(`.letter-input[data-number="${num}"]`).forEach(inp => {
-                if(!inp.classList.contains('locked')) { 
-                    inp.value = char; 
-                    if(char) { inp.classList.remove('animate-pop'); void inp.offsetWidth; inp.classList.add('animate-pop'); } 
-                }
+                if(!inp.classList.contains('locked')) { inp.value = char; if(char) { inp.classList.remove('animate-pop'); void inp.offsetWidth; inp.classList.add('animate-pop'); } }
             });
         }
 
@@ -703,11 +691,8 @@
         function animateStarsCollection(earnedStars) {
             const startContainer = document.getElementById('modal-stars');
             const targetElement = document.getElementById('star-display-fixed');
-            const totalText = document.getElementById('total-stars-fixed');
-
             if(!startContainer || !targetElement) return;
 
-            // Dapatkan posisi
             const startRect = startContainer.getBoundingClientRect();
             const targetRect = targetElement.getBoundingClientRect();
             const startX = startRect.left + startRect.width / 2;
@@ -718,34 +703,13 @@
             for (let i = 0; i < earnedStars; i++) {
                 const star = document.createElement('div');
                 star.innerHTML = '<i class="fa-solid fa-star text-yellow-400 text-2xl drop-shadow-md"></i>';
-                star.style.position = 'fixed';
-                star.style.left = `${startX}px`;
-                star.style.top = `${startY}px`;
-                star.style.zIndex = '10000';
-                star.style.transition = 'all 0.8s cubic-bezier(0.19, 1, 0.22, 1)';
-                star.style.transform = 'scale(0)';
-                
+                star.style.position = 'fixed'; star.style.left = `${startX}px`; star.style.top = `${startY}px`; star.style.zIndex = '10000'; star.style.transition = 'all 0.8s cubic-bezier(0.19, 1, 0.22, 1)'; star.style.transform = 'scale(0)';
                 document.body.appendChild(star);
 
-                // Sequence animation
                 setTimeout(() => {
                     star.style.transform = 'scale(1.5)';
-                    
-                    setTimeout(() => {
-                        star.style.left = `${targetX}px`;
-                        star.style.top = `${targetY}px`;
-                        star.style.transform = 'scale(0.5)';
-                        star.style.opacity = '0';
-                    }, 100);
-
-                    setTimeout(() => {
-                        star.remove();
-                        updateTotalStarsUI(); // Update UI angka total secara otomatis
-                        targetElement.classList.add('scale-125');
-                        setTimeout(() => targetElement.classList.remove('scale-125'), 200);
-                        playNotification(); // Sound 'Ting' saat bintang sampai
-                    }, 900);
-
+                    setTimeout(() => { star.style.left = `${targetX}px`; star.style.top = `${targetY}px`; star.style.transform = 'scale(0.5)'; star.style.opacity = '0'; }, 100);
+                    setTimeout(() => { star.remove(); updateTotalStarsUI(); targetElement.classList.add('scale-125'); setTimeout(() => targetElement.classList.remove('scale-125'), 200); playNotification(); }, 900);
                 }, i * 200);
             }
         }
@@ -756,26 +720,20 @@
             starsContainer.innerHTML = starHtml;
             const levelNum = currentLevelIdx + 1;
             
-            // Simpan data
-            if(!userProgress.stars[levelNum] || stars > userProgress.stars[levelNum]) {
-                userProgress.stars[levelNum] = stars;
-            }
+            if(!userProgress.stars[levelNum] || stars > userProgress.stars[levelNum]) { userProgress.stars[levelNum] = stars; }
             
-            // Calculate requirements for NEXT button logic
             const totalStars = Object.values(userProgress.stars).reduce((a, b) => a + b, 0);
             const nextLevelReq = (levelNum) * 2; 
 
             if(stars >= 2) {
                 emoji.innerText = "🎉"; document.getElementById('result-title').innerText = "LEVEL SELESAI!"; document.getElementById('result-title').className = "text-2xl font-bold text-green-600 mb-2";
-                if(userProgress.unlockedLevel < levelNum + 1 && levelNum < 10) userProgress.unlockedLevel = levelNum + 1;
+                if(userProgress.unlockedLevel < levelNum + 1 && levelNum < 50) userProgress.unlockedLevel = levelNum + 1;
                 
-                if(levelNum === 10) { msg.innerText = "Selamat! Kamu menamatkan semua level!"; btnNext.classList.add('hidden-force'); }
+                if(levelNum === 50) { msg.innerText = "Selamat! Kamu menamatkan semua level!"; btnNext.classList.add('hidden-force'); }
                 else if (totalStars >= nextLevelReq) { msg.innerText = "Hebat! Level selanjutnya terbuka."; btnNext.classList.remove('hidden-force'); } 
                 else { msg.innerText = `Level ${levelNum+1} butuh total ${nextLevelReq} ⭐.`; btnNext.classList.add('hidden-force'); }
                 
-                // Trigger animasi bintang
                 setTimeout(() => animateStarsCollection(stars), 500);
-
             } else {
                 emoji.innerText = "💪"; document.getElementById('result-title').innerText = "AYO COBA LAGI"; document.getElementById('result-title').className = "text-2xl font-bold text-orange-500 mb-2"; msg.innerText = "Minimal 2 bintang untuk lanjut."; btnNext.classList.add('hidden-force');
             }
@@ -792,7 +750,7 @@
         function closeInfoToast() { document.getElementById('info-toast-wrapper').classList.add('hidden-force'); }
         function openResetModal() { const savedData = localStorage.getItem('sandiKataProgress'); if (!savedData) { playNotification(); showInfoPopup("Belum ada data permainan yang tersimpan."); return; } playAlertSound(); document.getElementById('reset-modal').classList.remove('hidden-force'); }
         function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden-force'); }
-        function confirmReset() { playDeleteSound(); localStorage.removeItem('sandiKataProgress'); userProgress = { unlockedLevel: 1, stars: {} }; renderLevelGrid(); closeResetModal(); showInfoPopup("Data berhasil direset!"); }
+        function confirmReset() { playDeleteSound(); localStorage.removeItem('sandiKataProgress'); userProgress = { unlockedLevel: 1, stars: {} }; renderLevelGrid(); updateTotalStarsUI(); closeResetModal(); showInfoPopup("Data berhasil direset!"); }
 
     </script>
 </body>
