@@ -67,8 +67,8 @@
             text-transform: uppercase;
             color: #d946ef;
             font-weight: bold;
-            /* Font size dinamis agar pas di kotak kecil */
-            font-size: clamp(1.2rem, 5vw, 2rem);
+            /* Font size dinamis yang lebih fleksibel */
+            font-size: clamp(1rem, 5vw, 2rem);
             width: 100%;
             height: 100%;
             padding: 0;
@@ -80,12 +80,11 @@
         .letter-input:focus { outline: none; border-bottom-color: #d946ef; background-color: rgba(217, 70, 239, 0.1); }
         .letter-input.locked { color: #059669; background-color: rgba(5, 150, 105, 0.1); pointer-events: none; border-bottom-color: #059669; }
 
-        /* --- LAYOUT FIXES --- */
-        /* Kotak huruf dinamis */
+        /* --- PERBAIKAN CSS UTAMA (RESPONSIVE BOX) --- */
+        /* Menggunakan clamp dengan nilai minimum lebih kecil (16px) agar muat di HP kecil */
         .char-box { 
-            /* Lebar responsif: Min 20px, Ideal 8% layar, Max 48px */
-            width: clamp(20px, 8vw, 48px); 
-            height: clamp(38px, 12vw, 65px); 
+            width: clamp(16px, 6.5vw, 48px); /* Lebar dinamis */
+            height: clamp(32px, 10vw, 65px); /* Tinggi dinamis */
             margin: 0 1px; 
             display: flex; 
             flex-direction: column; 
@@ -93,29 +92,29 @@
             justify-content: flex-end;
         }
 
-        /* Nomor kecil di bawah */
+        /* Nomor kecil di bawah huruf */
         .char-box span {
-            font-size: clamp(0.55rem, 2vw, 0.8rem);
+            font-size: clamp(0.5rem, 2vw, 0.8rem);
             margin-top: 2px;
             line-height: 1;
         }
 
-        /* Wrapper kata tanpa margin kanan (diganti gap parent) */
+        /* Wrapper kata */
         .word-wrapper { 
             display: flex; 
-            /* Margin dihapus agar centering sempurna */
-            margin: 0; 
+            margin: 0; /* Margin direset, jarak diatur oleh gap parent */
         }
 
-        /* Container Pesan Rahasia: FLEXBOX CENTERING */
+        /* Container Pesan Rahasia: FLEXBOX CENTERING & WRAPPING */
         #quote-container {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Wajib wrap agar turun ke bawah */
             justify-content: center; /* Center Horizontal */
             align-items: center;     /* Center Vertical */
             align-content: center;
             width: 100%;
-            gap: 8px 16px; /* Gap: Baris 8px, Kolom(antar kata) 16px */
+            gap: 8px 12px; /* Gap: Baris 8px, Kolom(antar kata) 12px */
+            padding: 0 4px;
         }
 
         /* --- ANIMATIONS --- */
@@ -129,6 +128,12 @@
         .star-anim:nth-child(1) { animation-delay: 0.2s; }
         .star-anim:nth-child(2) { animation-delay: 0.4s; }
         .star-anim:nth-child(3) { animation-delay: 0.6s; }
+
+        /* Animasi Transisi Level (Baru) */
+        .fade-enter { opacity: 0; transform: translateY(20px); transition: all 0.4s ease-out; }
+        .fade-enter-active { opacity: 1; transform: translateY(0); }
+        .fade-exit { opacity: 1; transform: scale(1); transition: all 0.3s ease-in; }
+        .fade-exit-active { opacity: 0; transform: scale(0.95); }
 
         /* --- UTILS --- */
         .hidden-force { display: none !important; }
@@ -179,7 +184,7 @@
     </button>
 
     <!-- ================= HALAMAN HOME ================= -->
-    <div id="home-screen" class="flex-grow flex flex-col items-center justify-center p-4 relative pt-24">
+    <div id="home-screen" class="flex-grow flex flex-col items-center justify-center p-4 relative pt-24 fade-enter-active">
         <div class="text-center mb-8 animate-pop">
             <h1 class="text-5xl md:text-6xl font-bold text-purple-600 mb-2 drop-shadow-sm" style="text-shadow: 2px 2px 0px #fff;">SANDI KATA</h1>
             <p class="text-gray-500 font-bold tracking-wider text-sm bg-white/60 px-4 py-1 rounded-full inline-block">Kumpulkan Bintang untuk Membuka Gembok!</p>
@@ -195,7 +200,7 @@
     </div>
 
     <!-- ================= HALAMAN GAME ================= -->
-    <div id="game-screen" class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4 hidden-force pt-12">
+    <div id="game-screen" class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4 hidden-force pt-12 fade-enter">
         <div class="game-card max-w-4xl w-full shadow-2xl rounded-[2rem] p-5 md:p-8 border border-white/50 relative">
             
             <!-- Header Game -->
@@ -210,14 +215,12 @@
                 </div>
             </div>
 
-            <!-- Pesan Rahasia (CENTERED BOX FIX) -->
-            <!-- min-h-[160px] dan flex justify-center items-center menjamin box selalu di tengah -->
+            <!-- Pesan Rahasia (CENTERED & RESPONSIVE) -->
             <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 mb-6 relative shadow-inner flex flex-col justify-center items-center" 
-                 style="min-height: 160px; padding: 2.5rem 1rem 1.5rem 1rem;">
+                 style="min-height: 160px; padding: 2.5rem 0.5rem 1.5rem 0.5rem;">
                 
                 <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-indigo-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow-md tracking-wider whitespace-nowrap">PESAN RAHASIA</div>
                 
-                <!-- Container Text dengan Gap Flexbox -->
                 <div id="quote-container"></div>
             </div>
 
@@ -247,8 +250,9 @@
     <!-- FOOTER -->
     <footer class="text-center p-4 text-xs text-gray-400 font-bold mt-auto">&copy; Riyan 2025</footer>
 
-    <!-- ================= MODALS (SAMA SEPERTI SEBELUMNYA) ================= -->
-    <!-- Pengaturan -->
+    <!-- ================= MODALS ================= -->
+
+    <!-- Modal Pengaturan -->
     <div id="settings-modal" class="modal-overlay hidden-force" style="z-index: 9500;">
         <div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop">
             <h3 class="font-bold text-2xl text-gray-800 mb-6 border-b pb-2">Pengaturan</h3>
@@ -273,7 +277,7 @@
         </div>
     </div>
 
-    <!-- Info & About Modals -->
+    <!-- Modal Info -->
     <div id="info-modal" class="modal-overlay hidden-force" style="z-index: 9600;">
         <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full animate-pop relative">
             <button onclick="closeInfoModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
@@ -281,27 +285,29 @@
             <ul class="space-y-3 text-sm text-gray-600 text-left">
                 <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">1</span> Setiap angka mewakili satu huruf yang sama.</li>
                 <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">2</span> Isi kotak kosong berdasarkan petunjuk.</li>
-                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">3</span> Huruf yang diisi otomatis muncul di kotak lain.</li>
+                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">3</span> Huruf yang kamu isi akan otomatis muncul di kotak lain dengan angka yang sama.</li>
             </ul>
             <button onclick="closeInfoModal()" class="mt-6 w-full bg-purple-600 text-white py-2 rounded-xl font-bold">Mengerti</button>
         </div>
     </div>
+
+    <!-- MODAL TENTANG (UPDATE VERSI) -->
     <div id="about-modal" class="modal-overlay hidden-force" style="z-index: 9700;">
         <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full animate-pop relative text-center">
             <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
             <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg text-white text-3xl font-bold"><i class="fa-solid fa-gamepad"></i></div>
             <h3 class="font-bold text-2xl text-gray-800 mb-1">Sandi Kata</h3>
-            <p class="text-xs text-purple-500 font-bold mb-4 bg-purple-50 inline-block px-3 py-1 rounded-full">Versi 1.0.0</p>
+            <p class="text-xs text-purple-500 font-bold mb-4 bg-purple-50 inline-block px-3 py-1 rounded-full">Versi 1.2.0</p>
             <div class="space-y-3 text-sm text-gray-600 border-t pt-4 border-gray-100">
                 <div class="flex justify-between"><span class="text-gray-400">Pembuat</span><span class="font-bold text-gray-800">Riyan</span></div>
-                <div class="flex justify-between"><span class="text-gray-400">Asal</span><span class="font-bold text-gray-800 text-right">Sumatera Utara</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">Asal</span><span class="font-bold text-gray-800 text-right">Sumatera Utara,<br>Indonesia 🇮🇩</span></div>
                 <div class="flex justify-between"><span class="text-gray-400">Rilis</span><span class="font-bold text-gray-800">2025</span></div>
             </div>
             <a href="https://wa.me/6282275894842?text=Saya%20sudah%20memainkan%20permainan%20Sandi%20Kata.%20Saya%20ingin%20membuat%20kritik%20dan%20saran%3A...." target="_blank" class="mt-6 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm w-full transition shadow-md"><i class="fa-brands fa-whatsapp text-lg"></i> Kritik & Saran</a>
         </div>
     </div>
 
-    <!-- Modal Menang & Reset -->
+    <!-- Modal Menang & Helpers -->
     <div id="win-modal" class="modal-overlay hidden-force"><div class="bg-white p-8 rounded-3xl text-center shadow-2xl max-w-sm w-full animate-pop relative overflow-hidden"><div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#FFD700 2px, transparent 2px); background-size: 20px 20px;"></div><div id="result-emoji" class="text-7xl mb-2 filter drop-shadow-md">🎉</div><h2 id="result-title" class="text-2xl font-bold text-gray-800 mb-1">LEVEL SELESAI</h2><div class="flex justify-center gap-2 mb-4 text-4xl py-2" id="modal-stars"></div><p id="result-msg" class="text-gray-500 mb-6 text-sm font-medium"></p><div class="flex flex-col gap-3"><button id="btn-next-level" onclick="nextLevel()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition hidden-force">Lanjut Level Berikutnya</button><button onclick="restartLevel()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition">Main Ulang</button><button onclick="backToHome()" class="w-full text-gray-400 text-sm font-bold py-2 hover:text-gray-600">Kembali ke Menu</button></div></div></div>
     <div id="reset-modal" class="modal-overlay hidden-force" style="z-index: 120;"><div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop border-t-4 border-red-500"><div class="text-5xl mb-3">⚠️</div><h3 class="font-bold text-xl text-gray-800">Hapus Semua Data?</h3><p class="text-gray-500 text-sm mb-6">Progress level dan bintang akan hilang permanen.</p><div class="flex gap-3"><button onclick="closeResetModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold">Batal</button><button onclick="confirmReset()" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-bold">Hapus</button></div></div></div>
     <div id="error-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 110;"><div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-red-500 min-w-[280px] animate-pop max-w-xs"><div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-xmark text-3xl text-red-500"></i></div><h3 class="font-bold text-xl text-gray-800">Ups! Masih Salah</h3><p class="text-gray-500 text-sm mt-1 mb-4 text-center">Ada <b id="toast-count" class="text-red-500 text-lg"></b> kotak yang belum tepat.</p><button onclick="closeToast()" class="w-full bg-red-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition shadow-md">Coba Perbaiki</button></div></div>
@@ -493,36 +499,80 @@
             document.getElementById('total-stars-fixed').innerText = totalStars;
         }
 
-        function loadLevel(levelNum) {
-            currentLevelIdx = levelNum - 1;
-            hintsRemaining = 5; 
-            document.getElementById('hint-count').innerText = hintsRemaining;
-            document.getElementById('hint-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+        // --- ANIMASI TRANSISI LEVEL ---
+        // Fungsi baru untuk menangani animasi fade
+        function transitionLevel(callback) {
+            const gameScreen = document.getElementById('game-screen');
+            const homeScreen = document.getElementById('home-screen');
             
-            let diffLabel = "";
-            let autoHints = 0;
+            // Tentukan screen mana yang aktif
+            const activeScreen = gameScreen.classList.contains('hidden-force') ? homeScreen : gameScreen;
+            
+            // Animasi Keluar
+            activeScreen.classList.remove('fade-enter', 'fade-enter-active');
+            activeScreen.classList.add('fade-exit');
+            
+            // Tunggu sebentar, lalu update data & animasi masuk
+            setTimeout(() => {
+                activeScreen.classList.add('fade-exit-active');
+                
+                setTimeout(() => {
+                    callback(); // Jalankan logika load level / back home di sini
+                    
+                    // Reset kelas animasi
+                    activeScreen.classList.remove('fade-exit', 'fade-exit-active');
+                    
+                    // Ambil screen tujuan (yang baru saja di-remove hidden-force nya)
+                    const newActiveScreen = gameScreen.classList.contains('hidden-force') ? homeScreen : gameScreen;
+                    
+                    // Animasi Masuk
+                    newActiveScreen.classList.add('fade-enter');
+                    // Force reflow
+                    void newActiveScreen.offsetWidth;
+                    newActiveScreen.classList.add('fade-enter-active');
+                    
+                    // Bersihkan kelas setelah animasi selesai (opsional)
+                    setTimeout(() => {
+                        newActiveScreen.classList.remove('fade-enter', 'fade-enter-active');
+                    }, 400);
+                    
+                }, 300); // Waktu exit
+            }, 50);
+        }
 
-            if (levelNum <= 10) { diffLabel = "Mudah (2 Bantuan)"; autoHints = 2; } 
-            else if (levelNum <= 30) { diffLabel = "Sedang (1 Bantuan)"; autoHints = 1; } 
-            else { diffLabel = "Sulit (0 Bantuan)"; autoHints = 0; }
+        function loadLevel(levelNum) {
+            // Bungkus logika load level dalam fungsi transisi
+            transitionLevel(() => {
+                currentLevelIdx = levelNum - 1;
+                hintsRemaining = 5; 
+                document.getElementById('hint-count').innerText = hintsRemaining;
+                document.getElementById('hint-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+                
+                let diffLabel = "";
+                let autoHints = 0;
 
-            const badge = document.getElementById('difficulty-badge');
-            badge.innerText = diffLabel;
-            if(levelNum <= 10) badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 bg-green-100 text-green-600`;
-            else if(levelNum <= 30) badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 bg-yellow-100 text-yellow-600`;
-            else badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 bg-red-100 text-red-600`;
+                if (levelNum <= 10) { diffLabel = "Mudah (2 Bantuan)"; autoHints = 2; } 
+                else if (levelNum <= 30) { diffLabel = "Sedang (1 Bantuan)"; autoHints = 1; } 
+                else { diffLabel = "Sulit (0 Bantuan)"; autoHints = 0; }
 
-            const levelData = LEVEL_DATA[currentLevelIdx % LEVEL_DATA.length];
-            document.getElementById('home-screen').classList.add('hidden-force');
-            document.getElementById('game-screen').classList.remove('hidden-force');
-            document.getElementById('game-screen').classList.add('flex');
-            document.getElementById('level-title').innerText = `Level ${levelNum}`;
-            document.getElementById('mistake-counter').innerText = "0";
-            document.getElementById('mistake-counter').className = "text-2xl font-bold text-gray-700";
-            currentMistakes = 0;
-            generateMapping(levelData);
-            renderGame(levelData);
-            if(autoHints > 0) revealRandomHint(autoHints);
+                const badge = document.getElementById('difficulty-badge');
+                badge.innerText = diffLabel;
+                if(levelNum <= 10) badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 bg-green-100 text-green-600`;
+                else if(levelNum <= 30) badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 bg-yellow-100 text-yellow-600`;
+                else badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 bg-red-100 text-red-600`;
+
+                const levelData = LEVEL_DATA[currentLevelIdx % LEVEL_DATA.length];
+                document.getElementById('home-screen').classList.add('hidden-force');
+                document.getElementById('game-screen').classList.remove('hidden-force');
+                document.getElementById('game-screen').classList.add('flex'); // Pastikan display flex aktif
+                document.getElementById('level-title').innerText = `Level ${levelNum}`;
+                document.getElementById('mistake-counter').innerText = "0";
+                document.getElementById('mistake-counter').className = "text-2xl font-bold text-gray-700";
+                currentMistakes = 0;
+                generateMapping(levelData);
+                renderGame(levelData);
+                if(autoHints > 0) revealRandomHint(autoHints);
+            });
         }
 
         function generateMapping(data) {
@@ -710,9 +760,26 @@
             modal.classList.remove('hidden-force');
         }
 
-        function nextLevel() { document.getElementById('win-modal').classList.add('hidden-force'); loadLevel(currentLevelIdx + 2); }
-        function restartLevel() { document.getElementById('win-modal').classList.add('hidden-force'); loadLevel(currentLevelIdx + 1); }
-        function backToHome() { document.getElementById('game-screen').classList.add('hidden-force'); document.getElementById('game-screen').classList.remove('flex'); document.getElementById('win-modal').classList.add('hidden-force'); document.getElementById('home-screen').classList.remove('hidden-force'); renderLevelGrid(); }
+        function nextLevel() { 
+            document.getElementById('win-modal').classList.add('hidden-force'); 
+            loadLevel(currentLevelIdx + 2); // Gunakan loadLevel baru dengan transisi
+        }
+        function restartLevel() { 
+            document.getElementById('win-modal').classList.add('hidden-force'); 
+            loadLevel(currentLevelIdx + 1); // Gunakan loadLevel baru dengan transisi
+        }
+        
+        function backToHome() {
+            // Gunakan efek transisi saat kembali ke home
+            transitionLevel(() => {
+                document.getElementById('game-screen').classList.add('hidden-force');
+                document.getElementById('game-screen').classList.remove('flex');
+                document.getElementById('win-modal').classList.add('hidden-force');
+                document.getElementById('home-screen').classList.remove('hidden-force');
+                renderLevelGrid();
+            });
+        }
+
         function showToast(count) { const wrapper = document.getElementById('error-toast-wrapper'); document.getElementById('toast-count').innerText = count; wrapper.classList.remove('hidden-force'); }
         function closeToast() { document.getElementById('error-toast-wrapper').classList.add('hidden-force'); }
         function showInfoPopup(msg) { const wrapper = document.getElementById('info-toast-wrapper'); document.getElementById('info-msg').innerText = msg; wrapper.classList.remove('hidden-force'); }
