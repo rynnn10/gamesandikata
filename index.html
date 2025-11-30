@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Master Sandi Kata - Petualangan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Patrick Hand', cursive;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#86efac 1px, transparent 1px);
+            background-size: 24px 24px;
+            touch-action: manipulation;
+            overflow-x: hidden; 
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- LEVEL SELECT STYLES --- */
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(75px, 1fr));
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .level-box {
+            aspect-ratio: 1/1;
+            background: white;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #4b5563;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-bottom: 4px solid #e5e7eb;
+            transition: all 0.1s;
+            position: relative;
+        }
+
+        .level-box:active { transform: translateY(2px); border-bottom-width: 0px; margin-top: 4px; }
+        .level-box.locked { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; border-bottom-color: #d1d5db; }
+        .level-box.unlocked { background: #fff; border: 2px solid #d946ef; border-bottom: 4px solid #c026d3; color: #d946ef; }
+        .level-box.completed { background: #dcfce7; border-color: #22c55e; color: #15803d; }
+
+        .stars-container { display: flex; gap: 2px; margin-top: 2px; font-size: 0.6rem; }
+
+        /* --- GAME INPUT STYLES --- */
+        .game-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+
+        .letter-input {
+            border: none;
+            border-bottom: 3px solid #9ca3af;
+            background: transparent;
+            text-align: center;
+            text-transform: uppercase;
+            color: #d946ef;
+            font-weight: bold;
+            font-size: 1.6rem;
+            width: 100%;
+            height: 45px;
+            padding: 0;
+            margin: 0;
+            transition: all 0.2s;
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .letter-input:focus { outline: none; border-bottom-color: #d946ef; background-color: rgba(217, 70, 239, 0.1); }
+        .letter-input.locked { color: #059669; background-color: rgba(5, 150, 105, 0.1); pointer-events: none; border-bottom-color: #059669; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            60% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .star-anim { animation: popIn 0.6s backwards; }
+        .star-anim:nth-child(1) { animation-delay: 0.2s; }
+        .star-anim:nth-child(2) { animation-delay: 0.4s; }
+        .star-anim:nth-child(3) { animation-delay: 0.6s; }
+
+        /* --- UTILS --- */
+        .hidden-force { display: none !important; }
+        .flex-center { display: flex; align-items: center; justify-content: center; }
+        
+        /* Modal Wrapper: Flex Centering untuk HP */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .char-box { width: 34px; margin: 0 1px; display: flex; flex-direction: column; align-items: center; }
+        .word-wrapper { display: flex; margin-right: 14px; margin-bottom: 10px; }
+        
+        @media (min-width: 640px) {
+            .char-box { width: 48px; margin: 0 3px; }
+            .letter-input { font-size: 2.2rem; height: 55px; }
+            .level-grid { grid-template-columns: repeat(5, 1fr); max-width: 600px; gap: 20px; }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800">
+
+    <!-- GLOBAL AUDIO CONTROLLER -->
+    <button id="audio-toggle" class="fixed top-4 right-4 z-50 bg-white p-3 rounded-full shadow-lg border-2 hover:bg-gray-50 transition transform hover:scale-105 active:scale-95" title="Musik">
+        <i id="audio-icon" class="fa-solid fa-volume-xmark text-red-400 text-xl w-6 h-6 flex items-center justify-center"></i>
+    </button>
+
+    <!-- ================= HALAMAN HOME (LEVEL SELECT) ================= -->
+    <div id="home-screen" class="min-h-screen flex flex-col items-center justify-center p-4 relative">
+        <div class="text-center mb-8 animate-pop">
+            <h1 class="text-5xl font-bold text-purple-600 mb-2 drop-shadow-sm" style="text-shadow: 2px 2px 0px #fff;">SANDI KATA</h1>
+            <div class="inline-block bg-white/90 px-5 py-2 rounded-full shadow-sm border border-purple-100">
+                <p class="text-purple-500 font-bold">🎯 Misi: Kumpulkan Bintang!</p>
+            </div>
+        </div>
+
+        <div class="bg-white/70 backdrop-blur-md p-6 rounded-3xl shadow-xl w-full max-w-2xl border border-white/60">
+            <div id="level-container" class="level-grid">
+                <!-- Grid Level digenerate JS -->
+            </div>
+        </div>
+
+        <button onclick="openResetModal()" class="mt-8 px-4 py-2 text-xs text-gray-400 hover:text-red-500 font-bold border border-transparent hover:border-red-200 rounded-full transition">
+            <i class="fa-solid fa-trash mr-1"></i> Reset Data Permainan
+        </button>
+    </div>
+
+    <!-- ================= HALAMAN GAME ================= -->
+    <div id="game-screen" class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4 hidden-force">
+        <div class="game-card max-w-4xl w-full shadow-2xl rounded-[2rem] p-5 md:p-8 border border-white/50 relative">
+            
+            <!-- Header Game -->
+            <div class="flex justify-between items-start mb-6 pb-2 border-b border-gray-100">
+                <button onclick="backToHome()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl font-bold text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Menu
+                </button>
+                <div class="flex flex-col items-end">
+                    <span id="level-title" class="text-2xl font-bold text-purple-600 leading-none">Level 1</span>
+                    <span id="difficulty-badge" class="text-xs font-bold px-2 py-1 rounded bg-green-100 text-green-600 mt-1">
+                        Mudah
+                    </span>
+                    <div class="text-[10px] text-gray-400 mt-1">Target: Min 2 Bintang</div>
+                </div>
+            </div>
+
+            <!-- Pesan Rahasia -->
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-2xl border border-indigo-100 mb-6 relative shadow-inner">
+                <div class="absolute -top-3 left-4 bg-indigo-500 text-white px-3 py-0.5 rounded-full text-xs font-bold shadow-md">PESAN RAHASIA</div>
+                <div id="quote-container" class="flex flex-wrap justify-center mt-3"></div>
+            </div>
+
+            <!-- Petunjuk -->
+            <div class="space-y-3 mb-20 overflow-y-auto max-h-[45vh] md:max-h-none pr-1 custom-scroll">
+                <div id="clues-container" class="grid grid-cols-1 gap-3"></div>
+            </div>
+
+            <!-- Footer Controls -->
+            <div class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur px-6 py-4 rounded-b-[2rem] border-t border-gray-100 flex justify-between items-center z-20 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+                <div class="flex flex-col">
+                    <span class="text-xs text-gray-400 font-bold uppercase">Kesalahan</span>
+                    <span id="mistake-counter" class="text-2xl font-bold text-gray-700">0</span>
+                </div>
+                <button onclick="checkAnswer()" class="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:shadow-purple-500/40 hover:-translate-y-1 active:scale-95 transition flex items-center gap-2">
+                    CEK JAWABAN <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Modal Menang (Result) -->
+    <div id="win-modal" class="modal-overlay hidden-force">
+        <div class="bg-white p-8 rounded-3xl text-center shadow-2xl max-w-sm w-full animate-pop relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#FFD700 2px, transparent 2px); background-size: 20px 20px;"></div>
+            
+            <div id="result-emoji" class="text-7xl mb-2 filter drop-shadow-md">🎉</div>
+            <h2 id="result-title" class="text-2xl font-bold text-gray-800 mb-1">LEVEL SELESAI</h2>
+            
+            <div class="flex justify-center gap-2 mb-4 text-4xl py-2" id="modal-stars"></div>
+            <p id="result-msg" class="text-gray-500 mb-6 text-sm font-medium">Kamu butuh minimal 2 bintang untuk lanjut.</p>
+
+            <div class="flex flex-col gap-3">
+                <button id="btn-next-level" onclick="nextLevel()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition hidden-force">
+                    Lanjut Level Berikutnya <i class="fa-solid fa-forward ml-1"></i>
+                </button>
+                <button onclick="restartLevel()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Main Ulang
+                </button>
+                <button onclick="backToHome()" class="w-full text-gray-400 text-sm font-bold py-2 hover:text-gray-600">
+                    Kembali ke Menu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Salah (Popup Toast) -->
+    <div id="error-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 110;">
+        <div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-red-500 min-w-[280px] animate-pop max-w-xs">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-3">
+                <i class="fa-solid fa-xmark text-3xl text-red-500"></i>
+            </div>
+            <h3 class="font-bold text-xl text-gray-800">Ups! Masih Salah</h3>
+            <p class="text-gray-500 text-sm mt-1 mb-4 text-center">Ada <b id="toast-count" class="text-red-500 text-lg"></b> kotak yang belum tepat.</p>
+            <button onclick="closeToast()" class="w-full bg-red-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition shadow-md">
+                Coba Perbaiki
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Info (Notifikasi) -->
+    <div id="info-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 115;">
+        <div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-blue-500 min-w-[280px] animate-pop max-w-xs">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+                <i class="fa-solid fa-info text-3xl text-blue-500"></i>
+            </div>
+            <h3 class="font-bold text-xl text-gray-800">Info</h3>
+            <p id="info-msg" class="text-gray-500 text-sm mt-1 mb-4 text-center">Pesan Info</p>
+            <button onclick="closeInfoToast()" class="w-full bg-blue-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-600 transition shadow-md">
+                Mengerti
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi Reset -->
+    <div id="reset-modal" class="modal-overlay hidden-force" style="z-index: 120;">
+        <div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop border-t-4 border-red-500">
+            <div class="text-5xl mb-3">⚠️</div>
+            <h3 class="font-bold text-xl text-gray-800 mb-2">Hapus Semua Data?</h3>
+            <p class="text-gray-500 text-sm mb-6">Progress level dan bintang akan hilang permanen.</p>
+            <div class="flex gap-3">
+                <button onclick="closeResetModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold hover:bg-gray-300 transition">Batal</button>
+                <button onclick="confirmReset()" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-bold hover:bg-red-600 transition shadow-md">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA POOL SOAL ---
+        const LEVEL_DATA = [
+            { quote: "BHINNEKA TUNGGAL IKA", clues: [{icon:"🦅",q:"Lambang Negara",a:"GARUDA"}, {icon:"🏝️",q:"Pulau Dewata",a:"BALI"}, {icon:"👅",q:"Indra Pengecap",a:"LIDAH"}] },
+            { quote: "RAJIN PANGKAL PANDAI", clues: [{icon:"🦁",q:"Raja Hutan",a:"SINGA"}, {icon:"🌧️",q:"Air Langit",a:"HUJAN"}, {icon:"🚪",q:"Akses Masuk",a:"PINTU"}] },
+            { quote: "BERAKIT KE HULU", clues: [{icon:"🛶",q:"Perahu Kayu",a:"RAKIT"}, {icon:"🐟",q:"Bernapas Insang",a:"IKAN"}, {icon:"⛰️",q:"Dataran Tinggi",a:"BUKIT"}] },
+            { quote: "HEMAT PANGKAL KAYA", clues: [{icon:"💰",q:"Wadah Uang",a:"DOMPET"}, {icon:"🌙",q:"Cahaya Malam",a:"BULAN"}, {icon:"👀",q:"Indra Penglihat",a:"MATA"}] },
+            { quote: "MAJU TAK GENTAR", clues: [{icon:"⚔️",q:"Senjata Tajam",a:"PEDANG"}, {icon:"🔴",q:"Warna Darah",a:"MERAH"}, {icon:"👣",q:"Anggota Gerak",a:"KAKI"}] },
+            { quote: "AIR BERIAK TANDA TAK DALAM", clues: [{icon:"🌊",q:"Gelombang Air",a:"OMBAK"}, {icon:"⚓",q:"Parkir Kapal",a:"JANGKAR"}, {icon:"🚢",q:"Kendaraan Laut",a:"KAPAL"}] },
+            { quote: "DIMANA BUMI DIPIJAK", clues: [{icon:"🌍",q:"Planet Kita",a:"BUMI"}, {icon:"👞",q:"Alas Kaki",a:"SEPATU"}, {icon:"☁️",q:"Gumpalan Air",a:"AWAN"}] },
+            { quote: "SEDIKIT LAMA LAMA MENJADI BUKIT", clues: [{icon:"🐜",q:"Hewan Kecil",a:"SEMUT"}, {icon:"⏳",q:"Penunjuk Waktu",a:"JAM"}, {icon:"🏔️",q:"Gunung Kecil",a:"BUKIT"}] },
+            { quote: "BERSATU KITA TEGUH", clues: [{icon:"🤝",q:"Sapaan Tangan",a:"SALAM"}, {icon:"🏠",q:"Tempat Tinggal",a:"RUMAH"}, {icon:"🌳",q:"Tumbuhan Kayu",a:"POHON"}] },
+            { quote: "TUT WURI HANDAYANI", clues: [{icon:"🏫",q:"Tempat Belajar",a:"SEKOLAH"}, {icon:"📚",q:"Jendela Dunia",a:"BUKU"}, {icon:"✏️",q:"Alat Tulis",a:"PENSIL"}] }
+        ];
+
+        // --- GAME STATE ---
+        let userProgress = JSON.parse(localStorage.getItem('sandiKataProgress')) || {
+            unlockedLevel: 1, 
+            stars: {} 
+        };
+        
+        let currentLevelIdx = 0;
+        let currentMistakes = 0;
+        let charToNumberMap = {};
+        let isMuted = true;
+        let audioInitialized = false;
+
+        // --- AUDIO SYSTEM (ROBUST) ---
+        // Menggunakan sumber audio yang lebih stabil (Github Raw) untuk menghindari blokir hotlink
+        const SOUND_URLS = {
+            click: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/click.mp3",
+            type: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/typewriter.mp3",
+            win: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/winner.mp3",
+            fail: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/error.mp3", // Tetot
+            unlock: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/coins.mp3",
+            notification: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/bell.mp3",
+            bgm: "https://raw.githubusercontent.com/adrianolaru/adrianolaru.github.io/master/sounds/music.mp3" // Ganti dengan link BGM anda jika ada
+        };
+
+        const audio = {
+            bgm: new Audio("https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3"), // Keep original BGM source
+            click: new Audio(SOUND_URLS.click),
+            type: new Audio(SOUND_URLS.type),
+            win: new Audio(SOUND_URLS.win),
+            fail: new Audio(SOUND_URLS.fail),
+            unlock: new Audio(SOUND_URLS.unlock),
+            notification: new Audio(SOUND_URLS.notification)
+        };
+        
+        audio.bgm.loop = true;
+        audio.bgm.volume = 0.3;
+
+        // --- GLOBAL CLICK LISTENER ---
+        // Menangkap semua klik di halaman untuk memutar suara klik UI
+        document.addEventListener('click', (e) => {
+            // Inisialisasi Audio Context pada interaksi pertama user
+            if (!audioInitialized && !isMuted) {
+                audio.bgm.play().catch(() => {});
+                audioInitialized = true;
+            }
+            
+            // Cek jika yang diklik adalah tombol atau input
+            if (e.target.closest('button') || e.target.closest('.level-box') || e.target.closest('input')) {
+                playSfx('click');
+            }
+        });
+
+        // --- INIT ---
+        window.onload = function() {
+            renderLevelGrid();
+            if(!userProgress.unlockedLevel) userProgress = { unlockedLevel: 1, stars: {} };
+        };
+
+        // --- AUDIO TOGGLE ---
+        const audioToggleBtn = document.getElementById('audio-toggle');
+        const audioIcon = document.getElementById('audio-icon');
+
+        audioToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent double click sound
+            isMuted = !isMuted;
+            if(isMuted) {
+                audio.bgm.pause();
+                audioIcon.className = "fa-solid fa-volume-xmark text-red-400 text-xl";
+                audioToggleBtn.classList.remove('border-green-400');
+            } else {
+                audio.bgm.play().catch(e => console.log("Audio permission needed"));
+                audioIcon.className = "fa-solid fa-volume-high text-green-500 text-xl";
+                audioToggleBtn.classList.add('border-green-400');
+                playSfx('notification');
+                audioInitialized = true;
+            }
+        });
+
+        function playSfx(type) {
+            if (isMuted || !audio[type]) return;
+            // Gunakan cloneNode untuk suara pendek agar bisa overlap (cth: mengetik cepat)
+            const sound = audio[type].cloneNode();
+            sound.volume = 0.6;
+            sound.play().catch(() => {});
+        }
+
+        // --- LEVEL & UI LOGIC ---
+        function renderLevelGrid() {
+            const container = document.getElementById('level-container');
+            container.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const box = document.createElement('div');
+                const isUnlocked = i <= userProgress.unlockedLevel;
+                const starsCount = userProgress.stars[i] || 0;
+                
+                let classes = "level-box";
+                if (!isUnlocked) classes += " locked";
+                else if (starsCount > 0) classes += " unlocked completed";
+                else classes += " unlocked";
+                box.className = classes;
+                
+                if (isUnlocked) {
+                    let starsHtml = '';
+                    for(let s=1; s<=3; s++) starsHtml += `<i class="fa-solid fa-star ${s <= starsCount ? 'text-yellow-400' : 'text-gray-300'}"></i>`;
+                    box.innerHTML = `<span>${i}</span><div class="stars-container">${starsHtml}</div>`;
+                    box.onclick = () => loadLevel(i);
+                } else {
+                    box.innerHTML = `<i class="fa-solid fa-lock text-xl"></i>`;
+                }
+                container.appendChild(box);
+            }
+        }
+
+        function loadLevel(levelNum) {
+            currentLevelIdx = levelNum - 1;
+            let hintsCount = 0;
+            let diffLabel = "";
+
+            if (levelNum <= 3) { hintsCount = 2; diffLabel = "Mudah (2 Bantuan)"; } 
+            else if (levelNum <= 7) { hintsCount = 1; diffLabel = "Sedang (1 Bantuan)"; } 
+            else { hintsCount = 0; diffLabel = "Sulit (Tanpa Bantuan)"; }
+
+            const badge = document.getElementById('difficulty-badge');
+            badge.innerText = diffLabel;
+            badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 ${levelNum<=3 ? 'bg-green-100 text-green-600' : levelNum<=7 ? 'bg-yellow-100 text-yellow-600' : 'bg-red-100 text-red-600'}`;
+
+            const levelData = LEVEL_DATA[currentLevelIdx % LEVEL_DATA.length];
+
+            document.getElementById('home-screen').classList.add('hidden-force');
+            document.getElementById('game-screen').classList.remove('hidden-force');
+            document.getElementById('game-screen').classList.add('flex');
+            document.getElementById('level-title').innerText = `Level ${levelNum}`;
+            document.getElementById('mistake-counter').innerText = "0";
+            document.getElementById('mistake-counter').className = "text-2xl font-bold text-gray-700";
+            
+            currentMistakes = 0;
+            generateMapping(levelData);
+            renderGame(levelData);
+            
+            if(hintsCount > 0) revealRandomHint(hintsCount);
+        }
+
+        function generateMapping(data) {
+            charToNumberMap = {};
+            const fullText = (data.quote + data.clues.map(c => c.a).join('')).toUpperCase().replace(/[^A-Z]/g, '');
+            const uniqueChars = [...new Set(fullText.split(''))];
+            let numbers = Array.from({length: uniqueChars.length}, (_, i) => i + 1);
+            numbers.sort(() => Math.random() - 0.5);
+            uniqueChars.forEach((char, i) => { charToNumberMap[char] = numbers[i]; });
+        }
+
+        function renderGame(data) {
+            const qContainer = document.getElementById('quote-container');
+            const cContainer = document.getElementById('clues-container');
+            qContainer.innerHTML = '';
+            cContainer.innerHTML = '';
+
+            data.quote.split(' ').forEach(word => {
+                const wrap = document.createElement('div');
+                wrap.className = 'word-wrapper';
+                for(let char of word) wrap.appendChild(createBox(char));
+                qContainer.appendChild(wrap);
+            });
+
+            data.clues.forEach(clue => {
+                const row = document.createElement('div');
+                row.className = "bg-white p-3 rounded-xl border border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-3 shadow-sm";
+                row.innerHTML = `<div class="flex items-center gap-3 w-full sm:w-1/3 min-w-[150px]"><div class="text-2xl bg-purple-50 w-10 h-10 flex items-center justify-center rounded-lg">${clue.icon}</div><span class="text-gray-700 font-bold text-sm leading-tight">${clue.q}</span></div>`;
+                const inputs = document.createElement('div');
+                inputs.className = "flex flex-wrap";
+                clue.a.split(' ').forEach(word => {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'word-wrapper';
+                    for(let char of word) wrap.appendChild(createBox(char));
+                    inputs.appendChild(wrap);
+                });
+                row.appendChild(inputs);
+                cContainer.appendChild(row);
+            });
+        }
+
+        function createBox(char) {
+            char = char.toUpperCase();
+            const num = charToNumberMap[char];
+            const div = document.createElement('div');
+            div.className = 'char-box';
+            div.innerHTML = `<input type="text" maxlength="1" class="letter-input" data-number="${num}" data-real="${char}" autocomplete="off" inputmode="text"><span class="text-[0.7rem] font-bold text-gray-400 mt-1">${num}</span>`;
+            const inp = div.querySelector('input');
+            inp.addEventListener('input', (e) => handleInput(e, inp));
+            inp.addEventListener('focus', () => highlightBoxes(num, true));
+            inp.addEventListener('blur', () => highlightBoxes(num, false));
+            inp.addEventListener('keydown', (e) => handleNav(e, inp));
+            inp.addEventListener('click', function() { if(!this.classList.contains('locked')) this.select(); });
+            return div;
+        }
+
+        function revealRandomHint(count) {
+            setTimeout(() => {
+                const inputs = Array.from(document.querySelectorAll('.letter-input'));
+                const chars = [...new Set(inputs.map(i => i.dataset.real))];
+                for(let i=0; i<count; i++) {
+                    if(chars.length === 0) break;
+                    const randIdx = Math.floor(Math.random() * chars.length);
+                    const char = chars[randIdx];
+                    chars.splice(randIdx, 1);
+                    const num = charToNumberMap[char];
+                    document.querySelectorAll(`.letter-input[data-number="${num}"]`).forEach(inp => {
+                        inp.value = char;
+                        inp.classList.add('locked');
+                    });
+                }
+            }, 500);
+        }
+
+        function handleInput(e, el) {
+            let val = e.target.value.toUpperCase();
+            if(!/^[A-Z]$/.test(val)) {
+                if(val === "") syncInputs(el.dataset.number, "");
+                else el.value = "";
+                return;
+            }
+            playSfx('type'); // Suara ketik
+            syncInputs(el.dataset.number, val);
+            const next = el.parentElement.nextElementSibling;
+            if(next && next.querySelector('input')) {
+                const ni = next.querySelector('input');
+                ni.focus();
+                if(!ni.classList.contains('locked')) ni.select();
+            }
+        }
+
+        function syncInputs(num, char) {
+            document.querySelectorAll(`.letter-input[data-number="${num}"]`).forEach(inp => {
+                if(!inp.classList.contains('locked')) {
+                    inp.value = char;
+                    if(char) {
+                        inp.classList.remove('animate-pop');
+                        void inp.offsetWidth; 
+                        inp.classList.add('animate-pop');
+                    }
+                }
+            });
+        }
+
+        function highlightBoxes(num, isActive) {
+            document.querySelectorAll(`.letter-input[data-number="${num}"]`).forEach(inp => {
+                if(!inp.classList.contains('locked')) inp.style.backgroundColor = isActive ? "rgba(217, 70, 239, 0.15)" : "transparent";
+                inp.nextElementSibling.style.color = isActive ? "#d946ef" : "#9ca3af";
+            });
+        }
+
+        function handleNav(e, el) {
+            if(e.key === "Backspace" && el.value === "") {
+                const prev = el.parentElement.previousElementSibling;
+                if(prev && prev.querySelector('input')) {
+                    e.preventDefault();
+                    prev.querySelector('input').focus();
+                }
+            }
+        }
+
+        function checkAnswer() {
+            const inputs = document.querySelectorAll('.letter-input');
+            let isCorrect = true;
+            let levelErrors = 0;
+            inputs.forEach(i => { if(!i.classList.contains('locked')) i.style.color = "#d946ef"; });
+            inputs.forEach(inp => {
+                if(inp.value !== inp.dataset.real) {
+                    isCorrect = false;
+                    levelErrors++;
+                    if(inp.value !== "") inp.style.color = "red";
+                }
+            });
+
+            if(!isCorrect) {
+                if(levelErrors > 0) currentMistakes++;
+                const counter = document.getElementById('mistake-counter');
+                counter.innerText = currentMistakes;
+                counter.className = "text-2xl font-bold text-red-500 animate-pulse";
+                showToast(levelErrors);
+                playSfx('fail'); // Tetot / Buzzer
+                return;
+            }
+
+            playSfx('win');
+            let stars = 0;
+            if(currentMistakes === 0) stars = 3; else if(currentMistakes <= 3) stars = 2; else stars = 1;
+            showWinModal(stars);
+        }
+
+        // --- MODAL & RESET LOGIC ---
+        function showWinModal(stars) {
+            const modal = document.getElementById('win-modal');
+            const starsContainer = document.getElementById('modal-stars');
+            const btnNext = document.getElementById('btn-next-level');
+            const msg = document.getElementById('result-msg');
+            const emoji = document.getElementById('result-emoji');
+            
+            let starHtml = '';
+            for(let i=1; i<=3; i++) starHtml += `<i class="fa-solid fa-star ${i <= stars ? 'text-yellow-400 star-anim' : 'text-gray-300'}"></i>`;
+            starsContainer.innerHTML = starHtml;
+
+            const levelNum = currentLevelIdx + 1;
+            if(!userProgress.stars[levelNum] || stars > userProgress.stars[levelNum]) userProgress.stars[levelNum] = stars;
+
+            if(stars >= 2) {
+                emoji.innerText = "🎉";
+                document.getElementById('result-title').innerText = "LEVEL SELESAI!";
+                document.getElementById('result-title').className = "text-2xl font-bold text-green-600 mb-2";
+                if(userProgress.unlockedLevel < levelNum + 1 && levelNum < 10) userProgress.unlockedLevel = levelNum + 1;
+                
+                if(levelNum === 10) { msg.innerText = "Selamat! Kamu menamatkan semua level!"; btnNext.classList.add('hidden-force'); }
+                else { msg.innerText = "Hebat! Level selanjutnya terbuka."; btnNext.classList.remove('hidden-force'); }
+                setTimeout(() => playSfx('unlock'), 500);
+            } else {
+                emoji.innerText = "💪";
+                document.getElementById('result-title').innerText = "AYO COBA LAGI";
+                document.getElementById('result-title').className = "text-2xl font-bold text-orange-500 mb-2";
+                msg.innerText = "Minimal 2 bintang untuk lanjut.";
+                btnNext.classList.add('hidden-force');
+            }
+            localStorage.setItem('sandiKataProgress', JSON.stringify(userProgress));
+            modal.classList.remove('hidden-force');
+        }
+
+        function nextLevel() {
+            document.getElementById('win-modal').classList.add('hidden-force');
+            loadLevel(currentLevelIdx + 2);
+        }
+
+        function restartLevel() {
+            document.getElementById('win-modal').classList.add('hidden-force');
+            loadLevel(currentLevelIdx + 1);
+        }
+
+        function backToHome() {
+            document.getElementById('game-screen').classList.add('hidden-force');
+            document.getElementById('game-screen').classList.remove('flex');
+            document.getElementById('win-modal').classList.add('hidden-force');
+            document.getElementById('home-screen').classList.remove('hidden-force');
+            renderLevelGrid();
+        }
+
+        // Logic Toast Error
+        function showToast(count) {
+            const wrapper = document.getElementById('error-toast-wrapper');
+            document.getElementById('toast-count').innerText = count;
+            wrapper.classList.remove('hidden-force');
+        }
+        function closeToast() {
+            document.getElementById('error-toast-wrapper').classList.add('hidden-force');
+        }
+
+        // Logic Info Toast (Notifikasi Biru)
+        function showInfoPopup(msg) {
+            const wrapper = document.getElementById('info-toast-wrapper');
+            document.getElementById('info-msg').innerText = msg;
+            wrapper.classList.remove('hidden-force');
+        }
+        function closeInfoToast() {
+            document.getElementById('info-toast-wrapper').classList.add('hidden-force');
+        }
+
+        // Logic Reset dengan Pengecekan Data
+        function openResetModal() {
+            // Cek apakah ada data di localStorage
+            const savedData = localStorage.getItem('sandiKataProgress');
+            if (!savedData) {
+                // Jika tidak ada data, munculkan notifikasi info saja
+                playSfx('notification'); 
+                showInfoPopup("Belum ada data permainan yang tersimpan.");
+                return;
+            }
+            
+            // Jika ada data, munculkan modal konfirmasi
+            playSfx('fail'); // Suara alert ringan
+            document.getElementById('reset-modal').classList.remove('hidden-force');
+        }
+
+        function closeResetModal() {
+            document.getElementById('reset-modal').classList.add('hidden-force');
+        }
+        
+        function confirmReset() {
+            playSfx('notification'); // Suara notifikasi (Ting)
+            localStorage.removeItem('sandiKataProgress');
+            closeResetModal();
+            // Beri jeda 500ms agar suara sempat terdengar sebelum reload
+            setTimeout(() => location.reload(), 500);
+        }
+
+    </script>
+</body>
+</html>
+
+
