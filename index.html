@@ -56,7 +56,7 @@
 
         .stars-container { display: flex; gap: 2px; margin-top: 2px; font-size: 0.6rem; }
 
-        /* --- GAME INPUT STYLES (PERBAIKAN CSS RESPONSIVE DI SINI) --- */
+        /* --- GAME INPUT STYLES --- */
         .game-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
 
         .letter-input {
@@ -67,10 +67,10 @@
             text-transform: uppercase;
             color: #d946ef;
             font-weight: bold;
-            /* Font size dinamis: minimal 1rem, ideal 6% lebar layar, maks 2rem */
-            font-size: clamp(1rem, 6vw, 2rem);
+            /* Font size dinamis agar pas di kotak kecil */
+            font-size: clamp(1.2rem, 5vw, 2rem);
             width: 100%;
-            height: 100%; /* Mengisi container char-box */
+            height: 100%;
             padding: 0;
             margin: 0;
             transition: all 0.2s;
@@ -80,13 +80,12 @@
         .letter-input:focus { outline: none; border-bottom-color: #d946ef; background-color: rgba(217, 70, 239, 0.1); }
         .letter-input.locked { color: #059669; background-color: rgba(5, 150, 105, 0.1); pointer-events: none; border-bottom-color: #059669; }
 
-        /* --- PERBAIKAN LEBAR KOTAK --- */
-        /* Menggunakan CLAMP agar lebar kotak menyesuaikan layar HP */
+        /* --- LAYOUT FIXES --- */
+        /* Kotak huruf dinamis */
         .char-box { 
-            /* Lebar: Min 22px (hp kecil), Ideal 8.5% layar, Max 48px (desktop) */
-            width: clamp(22px, 8.5vw, 48px); 
-            /* Tinggi menyesuaikan lebar agar proporsional */
-            height: clamp(35px, 12vw, 60px); 
+            /* Lebar responsif: Min 20px, Ideal 8% layar, Max 48px */
+            width: clamp(20px, 8vw, 48px); 
+            height: clamp(38px, 12vw, 65px); 
             margin: 0 1px; 
             display: flex; 
             flex-direction: column; 
@@ -94,28 +93,29 @@
             justify-content: flex-end;
         }
 
-        /* Wrapper kata agar selalu rapi */
-        .word-wrapper { 
-            display: flex; 
-            margin-right: 8px; /* Jarak antar kata dikurangi sedikit */
-            margin-bottom: 12px; 
-            justify-content: center;
+        /* Nomor kecil di bawah */
+        .char-box span {
+            font-size: clamp(0.55rem, 2vw, 0.8rem);
+            margin-top: 2px;
+            line-height: 1;
         }
 
-        /* Container utama dipaksa tengah */
+        /* Wrapper kata tanpa margin kanan (diganti gap parent) */
+        .word-wrapper { 
+            display: flex; 
+            /* Margin dihapus agar centering sempurna */
+            margin: 0; 
+        }
+
+        /* Container Pesan Rahasia: FLEXBOX CENTERING */
         #quote-container {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
+            justify-content: center; /* Center Horizontal */
+            align-items: center;     /* Center Vertical */
+            align-content: center;
             width: 100%;
-            padding: 0 5px; /* Sedikit padding agar tidak mepet pinggir */
-        }
-
-        /* Nomor di bawah huruf */
-        .char-box span {
-            font-size: clamp(0.6rem, 2.5vw, 0.8rem); /* Ukuran font nomor dinamis */
-            margin-top: 2px;
+            gap: 8px 16px; /* Gap: Baris 8px, Kolom(antar kata) 16px */
         }
 
         /* --- ANIMATIONS --- */
@@ -129,11 +129,6 @@
         .star-anim:nth-child(1) { animation-delay: 0.2s; }
         .star-anim:nth-child(2) { animation-delay: 0.4s; }
         .star-anim:nth-child(3) { animation-delay: 0.6s; }
-
-        @keyframes flyStar {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(0.2); opacity: 0; }
-        }
 
         /* --- UTILS --- */
         .hidden-force { display: none !important; }
@@ -151,72 +146,39 @@
             backdrop-filter: blur(4px);
         }
         
-        /* Posisi Tombol Pengaturan */
-        #settings-btn {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            z-index: 9000;
-        }
+        /* Fixed UI Elements */
+        #settings-btn { position: fixed; top: 16px; right: 16px; z-index: 9000; }
+        #star-display-fixed { position: fixed; top: 16px; left: 16px; z-index: 9000; transition: transform 0.2s; }
 
-        /* Posisi Bintang Total */
-        #star-display-fixed {
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            z-index: 9000;
-            transition: transform 0.2s;
-        }
+        /* Slider */
+        input[type=range] { height: 6px; border-radius: 5px; outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: white; border: 2px solid currentColor; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-        /* Range Slider Custom Style */
-        input[type=range] {
-            height: 6px;
-            border-radius: 5px;
-            outline: none;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: white;
-            border: 2px solid currentColor;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        /* Accordion Style */
-        .audio-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        .audio-details.open {
-            max-height: 200px;
-        }
+        .audio-details { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .audio-details.open { max-height: 200px; }
 
         @media (min-width: 640px) {
-            .char-box { width: 48px; height: 75px; margin: 0 3px; }
+            .char-box { width: 48px; height: 80px; margin: 0 3px; }
             .letter-input { font-size: 2.2rem; }
             .level-grid { grid-template-columns: repeat(5, 1fr); max-width: 600px; gap: 20px; }
+            #quote-container { gap: 12px 24px; }
         }
     </style>
 </head>
 <body class="min-h-screen text-gray-800">
 
-    <!-- DISPLAY BINTANG TOTAL (POJOK KIRI ATAS) -->
+    <!-- DISPLAY BINTANG TOTAL -->
     <div id="star-display-fixed" class="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border-2 border-yellow-400 transform hover:scale-105 transition-transform duration-300">
         <i class="fa-solid fa-star text-yellow-500 text-xl animate-[spin_4s_linear_infinite]"></i>
         <span id="total-stars-fixed" class="font-bold text-gray-700 text-xl font-sans">0</span>
     </div>
 
-    <!-- TOMBOL PENGATURAN (POJOK KANAN ATAS) -->
+    <!-- TOMBOL PENGATURAN -->
     <button id="settings-btn" onclick="openSettings()" class="bg-white p-3 rounded-full shadow-lg border-2 hover:bg-gray-50 transition transform hover:scale-105 active:scale-95 flex items-center justify-center w-12 h-12 text-gray-600">
         <i class="fa-solid fa-gear text-xl"></i>
     </button>
 
-    <!-- ================= HALAMAN HOME (LEVEL SELECT) ================= -->
+    <!-- ================= HALAMAN HOME ================= -->
     <div id="home-screen" class="flex-grow flex flex-col items-center justify-center p-4 relative pt-24">
         <div class="text-center mb-8 animate-pop">
             <h1 class="text-5xl md:text-6xl font-bold text-purple-600 mb-2 drop-shadow-sm" style="text-shadow: 2px 2px 0px #fff;">SANDI KATA</h1>
@@ -224,9 +186,7 @@
         </div>
 
         <div class="bg-white/70 backdrop-blur-md p-6 rounded-3xl shadow-xl w-full max-w-2xl border border-white/60">
-            <div id="level-container" class="level-grid overflow-y-auto max-h-[60vh] custom-scroll p-2">
-                <!-- Grid Level digenerate JS -->
-            </div>
+            <div id="level-container" class="level-grid overflow-y-auto max-h-[60vh] custom-scroll p-2"></div>
         </div>
 
         <button onclick="openResetModal()" class="mt-8 px-4 py-2 text-xs text-gray-400 hover:text-red-500 font-bold border border-transparent hover:border-red-200 rounded-full transition">
@@ -245,17 +205,20 @@
                 </button>
                 <div class="flex flex-col items-end pr-10"> 
                     <span id="level-title" class="text-2xl font-bold text-purple-600 leading-none">Level 1</span>
-                    <span id="difficulty-badge" class="text-xs font-bold px-2 py-1 rounded bg-green-100 text-green-600 mt-1">
-                        Mudah
-                    </span>
+                    <span id="difficulty-badge" class="text-xs font-bold px-2 py-1 rounded bg-green-100 text-green-600 mt-1">Mudah</span>
                     <div class="text-[10px] text-gray-400 mt-1">Target: Min 2 Bintang</div>
                 </div>
             </div>
 
-            <!-- Pesan Rahasia -->
-            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-2xl border border-indigo-100 mb-6 relative shadow-inner">
-                <div class="absolute -top-3 left-4 bg-indigo-500 text-white px-3 py-0.5 rounded-full text-xs font-bold shadow-md">PESAN RAHASIA</div>
-                <div id="quote-container" class="flex flex-wrap justify-center mt-3 w-full"></div>
+            <!-- Pesan Rahasia (CENTERED BOX FIX) -->
+            <!-- min-h-[160px] dan flex justify-center items-center menjamin box selalu di tengah -->
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 mb-6 relative shadow-inner flex flex-col justify-center items-center" 
+                 style="min-height: 160px; padding: 2.5rem 1rem 1.5rem 1rem;">
+                
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-indigo-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow-md tracking-wider whitespace-nowrap">PESAN RAHASIA</div>
+                
+                <!-- Container Text dengan Gap Flexbox -->
+                <div id="quote-container"></div>
             </div>
 
             <!-- Petunjuk -->
@@ -265,19 +228,14 @@
 
             <!-- Footer Controls -->
             <div class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur px-4 py-4 rounded-b-[2rem] border-t border-gray-100 flex justify-between items-center z-20 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-                
-                <!-- Info Kesalahan -->
                 <div class="flex flex-col mr-2">
                     <span class="text-[10px] text-gray-400 font-bold uppercase">Salah</span>
                     <span id="mistake-counter" class="text-xl font-bold text-gray-700">0</span>
                 </div>
-
-                <!-- Tombol Bantuan -->
                 <div class="flex gap-2">
                     <button id="hint-btn" onclick="useHint()" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-full font-bold shadow-lg active:scale-95 transition flex items-center gap-1">
                         <i class="fa-solid fa-lightbulb"></i> <span id="hint-count">5</span>
                     </button>
-
                     <button onclick="checkAnswer()" class="bg-gradient-to-r from-purple-600 to-pink-500 text-white px-6 py-2 rounded-full font-bold shadow-lg hover:shadow-purple-500/40 hover:-translate-y-1 active:scale-95 transition flex items-center gap-2 text-sm md:text-base">
                         CEK <i class="fa-solid fa-check"></i>
                     </button>
@@ -286,86 +244,48 @@
         </div>
     </div>
 
-    <!-- FOOTER COPYRIGHT -->
-    <footer class="text-center p-4 text-xs text-gray-400 font-bold mt-auto">
-        &copy; Riyan 2025
-    </footer>
+    <!-- FOOTER -->
+    <footer class="text-center p-4 text-xs text-gray-400 font-bold mt-auto">&copy; Riyan 2025</footer>
 
-    <!-- ================= MODALS ================= -->
-
-    <!-- Modal Pengaturan -->
+    <!-- ================= MODALS (SAMA SEPERTI SEBELUMNYA) ================= -->
+    <!-- Pengaturan -->
     <div id="settings-modal" class="modal-overlay hidden-force" style="z-index: 9500;">
         <div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop">
             <h3 class="font-bold text-2xl text-gray-800 mb-6 border-b pb-2">Pengaturan</h3>
-            
             <div class="space-y-3">
-                <!-- Section Audio (Accordion) -->
                 <div class="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
                     <button id="audio-accordion-btn" class="w-full flex items-center justify-between p-3 bg-white hover:bg-gray-50 transition border-b border-gray-100">
-                        <div class="flex items-center gap-2">
-                            <i id="audio-icon-main" class="fa-solid fa-volume-high text-green-500 text-lg"></i>
-                            <span class="font-bold text-gray-700 text-sm">Suara & Musik</span>
-                        </div>
+                        <div class="flex items-center gap-2"><i id="audio-icon-main" class="fa-solid fa-volume-high text-green-500 text-lg"></i><span class="font-bold text-gray-700 text-sm">Suara & Musik</span></div>
                         <i id="audio-chevron" class="fa-solid fa-chevron-down text-gray-400 text-xs transition-transform duration-300"></i>
                     </button>
                     <div id="audio-sliders-panel" class="audio-details bg-gray-50 px-3">
                         <div class="py-3 space-y-4">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-gray-500">Status Suara</span>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="master-mute-toggle" class="sr-only peer" checked>
-                                    <div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-500"></div>
-                                </label>
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-bold text-gray-500 mb-1">
-                                    <span>Musik Latar</span>
-                                    <span id="bgm-val-display" class="text-purple-600">20%</span>
-                                </div>
-                                <input type="range" id="bgm-slider" min="0" max="100" value="20" class="w-full accent-purple-500 bg-gray-200 h-1.5 rounded-lg cursor-pointer">
-                            </div>
-                            <div>
-                                <div class="flex justify-between text-xs font-bold text-gray-500 mb-1">
-                                    <span>Efek Suara</span>
-                                    <span id="sfx-val-display" class="text-pink-600">80%</span>
-                                </div>
-                                <input type="range" id="sfx-slider" min="0" max="100" value="80" class="w-full accent-pink-500 bg-gray-200 h-1.5 rounded-lg cursor-pointer">
-                            </div>
+                            <div class="flex items-center justify-between"><span class="text-xs font-bold text-gray-500">Status Suara</span><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" id="master-mute-toggle" class="sr-only peer" checked><div class="w-9 h-5 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 peer-checked:bg-green-500"></div></label></div>
+                            <div><div class="flex justify-between text-xs font-bold text-gray-500 mb-1"><span>Musik Latar</span><span id="bgm-val-display" class="text-purple-600">20%</span></div><input type="range" id="bgm-slider" min="0" max="100" value="20" class="w-full accent-purple-500 bg-gray-200 h-1.5 rounded-lg cursor-pointer"></div>
+                            <div><div class="flex justify-between text-xs font-bold text-gray-500 mb-1"><span>Efek Suara</span><span id="sfx-val-display" class="text-pink-600">80%</span></div><input type="range" id="sfx-slider" min="0" max="100" value="80" class="w-full accent-pink-500 bg-gray-200 h-1.5 rounded-lg cursor-pointer"></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Buttons -->
-                <button onclick="openInfoModal()" class="w-full flex items-center justify-between bg-blue-50 p-3 rounded-xl hover:bg-blue-100 transition text-blue-700 border border-blue-200">
-                    <span class="font-bold text-sm"><i class="fa-solid fa-circle-question mr-2"></i> Cara Bermain</span>
-                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                </button>
-                <button onclick="openAboutModal()" class="w-full flex items-center justify-between bg-purple-50 p-3 rounded-xl hover:bg-purple-100 transition text-purple-700 border border-purple-200">
-                    <span class="font-bold text-sm"><i class="fa-solid fa-info-circle mr-2"></i> Tentang</span>
-                    <i class="fa-solid fa-chevron-right text-xs"></i>
-                </button>
+                <button onclick="openInfoModal()" class="w-full flex items-center justify-between bg-blue-50 p-3 rounded-xl hover:bg-blue-100 transition text-blue-700 border border-blue-200"><span class="font-bold text-sm"><i class="fa-solid fa-circle-question mr-2"></i> Cara Bermain</span><i class="fa-solid fa-chevron-right text-xs"></i></button>
+                <button onclick="openAboutModal()" class="w-full flex items-center justify-between bg-purple-50 p-3 rounded-xl hover:bg-purple-100 transition text-purple-700 border border-purple-200"><span class="font-bold text-sm"><i class="fa-solid fa-info-circle mr-2"></i> Tentang</span><i class="fa-solid fa-chevron-right text-xs"></i></button>
             </div>
             <button onclick="closeSettings()" class="mt-6 w-full bg-gray-800 text-white py-3 rounded-xl font-bold hover:bg-gray-700 transition">Tutup</button>
         </div>
     </div>
 
-    <!-- Modal Info & About -->
+    <!-- Info & About Modals -->
     <div id="info-modal" class="modal-overlay hidden-force" style="z-index: 9600;">
         <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full animate-pop relative">
             <button onclick="closeInfoModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
             <h3 class="font-bold text-2xl text-purple-600 mb-4 text-center">Cara Bermain</h3>
             <ul class="space-y-3 text-sm text-gray-600 text-left">
                 <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">1</span> Setiap angka mewakili satu huruf yang sama.</li>
-                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">2</span> Isi kotak kosong berdasarkan petunjuk gambar dan pertanyaan.</li>
-                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">3</span> Huruf yang kamu isi akan otomatis muncul di kotak lain dengan angka yang sama.</li>
-                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">4</span> Hindari kesalahan untuk mendapatkan 3 Bintang!</li>
+                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">2</span> Isi kotak kosong berdasarkan petunjuk.</li>
+                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">3</span> Huruf yang diisi otomatis muncul di kotak lain.</li>
             </ul>
-            <div class="mt-6 bg-green-50 p-3 rounded-lg border border-green-100 text-center"><p class="text-xs text-green-700 font-bold">Tips: Kotak hijau adalah huruf bantuan.</p></div>
             <button onclick="closeInfoModal()" class="mt-6 w-full bg-purple-600 text-white py-2 rounded-xl font-bold">Mengerti</button>
         </div>
     </div>
-
-    <!-- MODAL TENTANG (UPDATED) -->
     <div id="about-modal" class="modal-overlay hidden-force" style="z-index: 9700;">
         <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full animate-pop relative text-center">
             <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
@@ -374,63 +294,18 @@
             <p class="text-xs text-purple-500 font-bold mb-4 bg-purple-50 inline-block px-3 py-1 rounded-full">Versi 1.0.0</p>
             <div class="space-y-3 text-sm text-gray-600 border-t pt-4 border-gray-100">
                 <div class="flex justify-between"><span class="text-gray-400">Pembuat</span><span class="font-bold text-gray-800">Riyan</span></div>
-                <div class="flex justify-between"><span class="text-gray-400">Asal</span><span class="font-bold text-gray-800 text-right">Sumatera Utara,<br>Indonesia 🇮🇩</span></div>
+                <div class="flex justify-between"><span class="text-gray-400">Asal</span><span class="font-bold text-gray-800 text-right">Sumatera Utara</span></div>
                 <div class="flex justify-between"><span class="text-gray-400">Rilis</span><span class="font-bold text-gray-800">2025</span></div>
             </div>
-            
-            <!-- TOMBOL WA -->
-            <a href="https://wa.me/6282275894842?text=Saya%20sudah%20memainkan%20permainan%20Sandi%20Kata.%20Saya%20ingin%20membuat%20kritik%20dan%20saran%3A...." target="_blank" class="mt-6 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm w-full transition shadow-md">
-                <i class="fa-brands fa-whatsapp text-lg"></i> Kritik & Saran
-            </a>
-
-            <div class="mt-4 text-xs text-gray-400">Terima kasih telah bermain!<br>Dibuat dengan ❤️ untuk edukasi.</div>
+            <a href="https://wa.me/6282275894842?text=Saya%20sudah%20memainkan%20permainan%20Sandi%20Kata.%20Saya%20ingin%20membuat%20kritik%20dan%20saran%3A...." target="_blank" class="mt-6 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm w-full transition shadow-md"><i class="fa-brands fa-whatsapp text-lg"></i> Kritik & Saran</a>
         </div>
     </div>
 
-    <!-- Modal Menang -->
-    <div id="win-modal" class="modal-overlay hidden-force">
-        <div class="bg-white p-8 rounded-3xl text-center shadow-2xl max-w-sm w-full animate-pop relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#FFD700 2px, transparent 2px); background-size: 20px 20px;"></div>
-            <div id="result-emoji" class="text-7xl mb-2 filter drop-shadow-md">🎉</div>
-            <h2 id="result-title" class="text-2xl font-bold text-gray-800 mb-1">LEVEL SELESAI</h2>
-            <div class="flex justify-center gap-2 mb-4 text-4xl py-2" id="modal-stars"></div>
-            <p id="result-msg" class="text-gray-500 mb-6 text-sm font-medium">Kamu butuh minimal 2 bintang untuk lanjut.</p>
-            <div class="flex flex-col gap-3">
-                <button id="btn-next-level" onclick="nextLevel()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition hidden-force">Lanjut Level Berikutnya <i class="fa-solid fa-forward ml-1"></i></button>
-                <button onclick="restartLevel()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition"><i class="fa-solid fa-rotate-right mr-1"></i> Main Ulang</button>
-                <button onclick="backToHome()" class="w-full text-gray-400 text-sm font-bold py-2 hover:text-gray-600">Kembali ke Menu</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Helpers -->
-    <div id="error-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 110;">
-        <div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-red-500 min-w-[280px] animate-pop max-w-xs">
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-xmark text-3xl text-red-500"></i></div>
-            <h3 class="font-bold text-xl text-gray-800">Ups! Masih Salah</h3>
-            <p class="text-gray-500 text-sm mt-1 mb-4 text-center">Ada <b id="toast-count" class="text-red-500 text-lg"></b> kotak yang belum tepat.</p>
-            <button onclick="closeToast()" class="w-full bg-red-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition shadow-md">Coba Perbaiki</button>
-        </div>
-    </div>
-    <div id="info-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 9700;">
-        <div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-blue-500 min-w-[280px] animate-pop max-w-xs">
-            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-info text-3xl text-blue-500"></i></div>
-            <h3 class="font-bold text-xl text-gray-800">Info</h3>
-            <p id="info-msg" class="text-gray-500 text-sm mt-1 mb-4 text-center">Pesan Info</p>
-            <button onclick="closeInfoToast()" class="w-full bg-blue-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-600 transition shadow-md">Mengerti</button>
-        </div>
-    </div>
-    <div id="reset-modal" class="modal-overlay hidden-force" style="z-index: 120;">
-        <div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop border-t-4 border-red-500">
-            <div class="text-5xl mb-3">⚠️</div>
-            <h3 class="font-bold text-xl text-gray-800">Hapus Semua Data?</h3>
-            <p class="text-gray-500 text-sm mb-6">Progress level dan bintang akan hilang permanen.</p>
-            <div class="flex gap-3">
-                <button onclick="closeResetModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold">Batal</button>
-                <button onclick="confirmReset()" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-bold">Hapus</button>
-            </div>
-        </div>
-    </div>
+    <!-- Modal Menang & Reset -->
+    <div id="win-modal" class="modal-overlay hidden-force"><div class="bg-white p-8 rounded-3xl text-center shadow-2xl max-w-sm w-full animate-pop relative overflow-hidden"><div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#FFD700 2px, transparent 2px); background-size: 20px 20px;"></div><div id="result-emoji" class="text-7xl mb-2 filter drop-shadow-md">🎉</div><h2 id="result-title" class="text-2xl font-bold text-gray-800 mb-1">LEVEL SELESAI</h2><div class="flex justify-center gap-2 mb-4 text-4xl py-2" id="modal-stars"></div><p id="result-msg" class="text-gray-500 mb-6 text-sm font-medium"></p><div class="flex flex-col gap-3"><button id="btn-next-level" onclick="nextLevel()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition hidden-force">Lanjut Level Berikutnya</button><button onclick="restartLevel()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition">Main Ulang</button><button onclick="backToHome()" class="w-full text-gray-400 text-sm font-bold py-2 hover:text-gray-600">Kembali ke Menu</button></div></div></div>
+    <div id="reset-modal" class="modal-overlay hidden-force" style="z-index: 120;"><div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop border-t-4 border-red-500"><div class="text-5xl mb-3">⚠️</div><h3 class="font-bold text-xl text-gray-800">Hapus Semua Data?</h3><p class="text-gray-500 text-sm mb-6">Progress level dan bintang akan hilang permanen.</p><div class="flex gap-3"><button onclick="closeResetModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold">Batal</button><button onclick="confirmReset()" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-bold">Hapus</button></div></div></div>
+    <div id="error-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 110;"><div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-red-500 min-w-[280px] animate-pop max-w-xs"><div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-xmark text-3xl text-red-500"></i></div><h3 class="font-bold text-xl text-gray-800">Ups! Masih Salah</h3><p class="text-gray-500 text-sm mt-1 mb-4 text-center">Ada <b id="toast-count" class="text-red-500 text-lg"></b> kotak yang belum tepat.</p><button onclick="closeToast()" class="w-full bg-red-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition shadow-md">Coba Perbaiki</button></div></div>
+    <div id="info-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 9700;"><div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-blue-500 min-w-[280px] animate-pop max-w-xs"><div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-info text-3xl text-blue-500"></i></div><h3 class="font-bold text-xl text-gray-800">Info</h3><p id="info-msg" class="text-gray-500 text-sm mt-1 mb-4 text-center"></p><button onclick="closeInfoToast()" class="w-full bg-blue-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-600 transition shadow-md">Mengerti</button></div></div>
 
     <script>
         // --- DATA POOL SOAL ---
