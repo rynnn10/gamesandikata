@@ -67,8 +67,7 @@
             text-transform: uppercase;
             color: #d946ef;
             font-weight: bold;
-            /* Font size dinamis yang lebih fleksibel */
-            font-size: clamp(1rem, 5vw, 2rem);
+            font-size: 1.6rem; 
             width: 100%;
             height: 100%;
             padding: 0;
@@ -80,11 +79,10 @@
         .letter-input:focus { outline: none; border-bottom-color: #d946ef; background-color: rgba(217, 70, 239, 0.1); }
         .letter-input.locked { color: #059669; background-color: rgba(5, 150, 105, 0.1); pointer-events: none; border-bottom-color: #059669; }
 
-        /* --- PERBAIKAN CSS UTAMA (RESPONSIVE BOX) --- */
-        /* Menggunakan clamp dengan nilai minimum lebih kecil (16px) agar muat di HP kecil */
+        /* --- LAYOUT FIXES --- */
         .char-box { 
-            width: clamp(16px, 6.5vw, 48px); /* Lebar dinamis */
-            height: clamp(32px, 10vw, 65px); /* Tinggi dinamis */
+            width: 34px; 
+            height: 55px;
             margin: 0 1px; 
             display: flex; 
             flex-direction: column; 
@@ -92,70 +90,52 @@
             justify-content: flex-end;
         }
 
-        /* Nomor kecil di bawah huruf */
-        .char-box span {
-            font-size: clamp(0.5rem, 2vw, 0.8rem);
-            margin-top: 2px;
-            line-height: 1;
-        }
-
-        /* Wrapper kata */
+        .char-box span { font-size: 0.75rem; margin-top: 2px; line-height: 1; }
+        
         .word-wrapper { 
             display: flex; 
-            margin: 0; /* Margin direset, jarak diatur oleh gap parent */
+            margin: 4px; 
         }
 
-        /* Container Pesan Rahasia: FLEXBOX CENTERING & WRAPPING */
         #quote-container {
             display: flex;
-            flex-wrap: wrap; /* Wajib wrap agar turun ke bawah */
-            justify-content: center; /* Center Horizontal */
-            align-items: center;     /* Center Vertical */
-            align-content: center;
+            flex-wrap: wrap;
+            justify-content: center; 
+            align-items: center;
             width: 100%;
-            gap: 8px 12px; /* Gap: Baris 8px, Kolom(antar kata) 12px */
-            padding: 0 4px;
         }
 
-        /* --- ANIMATIONS --- */
-        @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            60% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        /* --- ANIMATIONS & TRANSITIONS --- */
+        @keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
         .animate-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .star-anim { animation: popIn 0.6s backwards; }
         .star-anim:nth-child(1) { animation-delay: 0.2s; }
         .star-anim:nth-child(2) { animation-delay: 0.4s; }
         .star-anim:nth-child(3) { animation-delay: 0.6s; }
 
-        /* Animasi Transisi Level (Baru) */
-        .fade-enter { opacity: 0; transform: translateY(20px); transition: all 0.4s ease-out; }
-        .fade-enter-active { opacity: 1; transform: translateY(0); }
-        .fade-exit { opacity: 1; transform: scale(1); transition: all 0.3s ease-in; }
-        .fade-exit-active { opacity: 0; transform: scale(0.95); }
+        /* Transisi Halaman yang Lebih Halus */
+        .screen-transition {
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 1;
+            transform: scale(1);
+        }
+        .screen-hidden-anim {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
 
         /* --- UTILS --- */
         .hidden-force { display: none !important; }
         .flex-center { display: flex; align-items: center; justify-content: center; }
         
         .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0,0,0,0.7);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            backdrop-filter: blur(4px);
+            position: fixed; inset: 0; background-color: rgba(0,0,0,0.7); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(4px);
         }
         
-        /* Fixed UI Elements */
         #settings-btn { position: fixed; top: 16px; right: 16px; z-index: 9000; }
         #star-display-fixed { position: fixed; top: 16px; left: 16px; z-index: 9000; transition: transform 0.2s; }
 
-        /* Slider */
         input[type=range] { height: 6px; border-radius: 5px; outline: none; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: white; border: 2px solid currentColor; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
@@ -172,19 +152,16 @@
 </head>
 <body class="min-h-screen text-gray-800">
 
-    <!-- DISPLAY BINTANG TOTAL -->
     <div id="star-display-fixed" class="flex items-center gap-2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border-2 border-yellow-400 transform hover:scale-105 transition-transform duration-300">
         <i class="fa-solid fa-star text-yellow-500 text-xl animate-[spin_4s_linear_infinite]"></i>
         <span id="total-stars-fixed" class="font-bold text-gray-700 text-xl font-sans">0</span>
     </div>
 
-    <!-- TOMBOL PENGATURAN -->
     <button id="settings-btn" onclick="openSettings()" class="bg-white p-3 rounded-full shadow-lg border-2 hover:bg-gray-50 transition transform hover:scale-105 active:scale-95 flex items-center justify-center w-12 h-12 text-gray-600">
         <i class="fa-solid fa-gear text-xl"></i>
     </button>
 
-    <!-- ================= HALAMAN HOME ================= -->
-    <div id="home-screen" class="flex-grow flex flex-col items-center justify-center p-4 relative pt-24 fade-enter-active">
+    <div id="home-screen" class="flex-grow flex flex-col items-center justify-center p-4 relative pt-24 screen-transition">
         <div class="text-center mb-8 animate-pop">
             <h1 class="text-5xl md:text-6xl font-bold text-purple-600 mb-2 drop-shadow-sm" style="text-shadow: 2px 2px 0px #fff;">SANDI KATA</h1>
             <p class="text-gray-500 font-bold tracking-wider text-sm bg-white/60 px-4 py-1 rounded-full inline-block">Kumpulkan Bintang untuk Membuka Gembok!</p>
@@ -199,11 +176,9 @@
         </button>
     </div>
 
-    <!-- ================= HALAMAN GAME ================= -->
-    <div id="game-screen" class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4 hidden-force pt-12 fade-enter">
+    <div id="game-screen" class="min-h-screen flex flex-col items-center justify-center p-2 md:p-4 hidden-force pt-12 screen-transition screen-hidden-anim">
         <div class="game-card max-w-4xl w-full shadow-2xl rounded-[2rem] p-5 md:p-8 border border-white/50 relative">
             
-            <!-- Header Game -->
             <div class="flex justify-between items-start mb-6 pb-2 border-b border-gray-100">
                 <button onclick="backToHome()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl font-bold text-sm transition flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Menu
@@ -215,21 +190,22 @@
                 </div>
             </div>
 
-            <!-- Pesan Rahasia (CENTERED & RESPONSIVE) -->
             <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 mb-6 relative shadow-inner flex flex-col justify-center items-center" 
                  style="min-height: 160px; padding: 2.5rem 0.5rem 1.5rem 0.5rem;">
                 
                 <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-indigo-500 text-white px-4 py-1 rounded-full text-xs font-bold shadow-md tracking-wider whitespace-nowrap">PESAN RAHASIA</div>
                 
+                <button id="explanation-btn" onclick="showExplanation()" class="absolute -top-3 right-4 bg-yellow-400 hover:bg-yellow-500 text-white w-8 h-8 rounded-full shadow-lg flex items-center justify-center transition hover:scale-110 hidden z-10" title="Penjelasan">
+                    <i class="fa-solid fa-question text-sm font-bold"></i>
+                </button>
+
                 <div id="quote-container"></div>
             </div>
 
-            <!-- Petunjuk -->
             <div class="space-y-3 mb-20 overflow-y-auto max-h-[45vh] md:max-h-none pr-1 custom-scroll">
                 <div id="clues-container" class="grid grid-cols-1 gap-3"></div>
             </div>
 
-            <!-- Footer Controls -->
             <div class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur px-4 py-4 rounded-b-[2rem] border-t border-gray-100 flex justify-between items-center z-20 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
                 <div class="flex flex-col mr-2">
                     <span class="text-[10px] text-gray-400 font-bold uppercase">Salah</span>
@@ -247,12 +223,21 @@
         </div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="text-center p-4 text-xs text-gray-400 font-bold mt-auto">&copy; Riyan 2025</footer>
 
-    <!-- ================= MODALS ================= -->
+    <div id="explanation-modal" class="modal-overlay hidden-force" style="z-index: 9800;">
+        <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full animate-pop relative border-t-4 border-yellow-400">
+            <button onclick="closeExplanationModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3 text-yellow-500 text-2xl">
+                <i class="fa-solid fa-lightbulb"></i>
+            </div>
+            <h3 class="font-bold text-xl text-gray-800 text-center mb-2">Makna Kata</h3>
+            <div id="explanation-content" class="text-gray-600 text-sm text-center leading-relaxed bg-yellow-50 p-4 rounded-xl border border-yellow-100">
+                </div>
+            <button onclick="closeExplanationModal()" class="mt-4 w-full bg-yellow-500 text-white py-2 rounded-xl font-bold">Tutup</button>
+        </div>
+    </div>
 
-    <!-- Modal Pengaturan -->
     <div id="settings-modal" class="modal-overlay hidden-force" style="z-index: 9500;">
         <div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop">
             <h3 class="font-bold text-2xl text-gray-800 mb-6 border-b pb-2">Pengaturan</h3>
@@ -277,95 +262,116 @@
         </div>
     </div>
 
-    <!-- Modal Info -->
-    <div id="info-modal" class="modal-overlay hidden-force" style="z-index: 9600;">
-        <div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full animate-pop relative">
-            <button onclick="closeInfoModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
-            <h3 class="font-bold text-2xl text-purple-600 mb-4 text-center">Cara Bermain</h3>
-            <ul class="space-y-3 text-sm text-gray-600 text-left">
-                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">1</span> Setiap angka mewakili satu huruf yang sama.</li>
-                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">2</span> Isi kotak kosong berdasarkan petunjuk.</li>
-                <li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">3</span> Huruf yang kamu isi akan otomatis muncul di kotak lain dengan angka yang sama.</li>
-            </ul>
-            <button onclick="closeInfoModal()" class="mt-6 w-full bg-purple-600 text-white py-2 rounded-xl font-bold">Mengerti</button>
-        </div>
-    </div>
-
-    <!-- MODAL TENTANG (UPDATE VERSI) -->
-    <div id="about-modal" class="modal-overlay hidden-force" style="z-index: 9700;">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full animate-pop relative text-center">
-            <button onclick="closeAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button>
-            <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg text-white text-3xl font-bold"><i class="fa-solid fa-gamepad"></i></div>
-            <h3 class="font-bold text-2xl text-gray-800 mb-1">Sandi Kata</h3>
-            <p class="text-xs text-purple-500 font-bold mb-4 bg-purple-50 inline-block px-3 py-1 rounded-full">Versi 1.2.0</p>
-            <div class="space-y-3 text-sm text-gray-600 border-t pt-4 border-gray-100">
-                <div class="flex justify-between"><span class="text-gray-400">Pembuat</span><span class="font-bold text-gray-800">Riyan</span></div>
-                <div class="flex justify-between"><span class="text-gray-400">Asal</span><span class="font-bold text-gray-800 text-right">Sumatera Utara,<br>Indonesia 🇮🇩</span></div>
-                <div class="flex justify-between"><span class="text-gray-400">Rilis</span><span class="font-bold text-gray-800">2025</span></div>
-            </div>
-            <a href="https://wa.me/6282275894842?text=Saya%20sudah%20memainkan%20permainan%20Sandi%20Kata.%20Saya%20ingin%20membuat%20kritik%20dan%20saran%3A...." target="_blank" class="mt-6 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm w-full transition shadow-md"><i class="fa-brands fa-whatsapp text-lg"></i> Kritik & Saran</a>
-        </div>
-    </div>
-
-    <!-- Modal Menang & Helpers -->
+    <div id="info-modal" class="modal-overlay hidden-force" style="z-index: 9600;"><div class="bg-white p-6 rounded-3xl shadow-2xl max-w-sm w-full animate-pop relative"><button onclick="closeInfoModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button><h3 class="font-bold text-2xl text-purple-600 mb-4 text-center">Cara Bermain</h3><ul class="space-y-3 text-sm text-gray-600 text-left"><li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">1</span> Setiap angka mewakili satu huruf yang sama.</li><li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">2</span> Isi kotak kosong berdasarkan petunjuk.</li><li class="flex items-start"><span class="bg-purple-100 text-purple-600 rounded-full w-6 h-6 flex items-center justify-center font-bold mr-2 text-xs flex-shrink-0">3</span> Huruf yang diisi otomatis muncul di kotak lain.</li></ul><button onclick="closeInfoModal()" class="mt-6 w-full bg-purple-600 text-white py-2 rounded-xl font-bold">Mengerti</button></div></div>
+    <div id="about-modal" class="modal-overlay hidden-force" style="z-index: 9700;"><div class="bg-white p-8 rounded-3xl shadow-2xl max-w-xs w-full animate-pop relative text-center"><button onclick="closeAboutModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-2xl"></i></button><div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto flex items-center justify-center mb-4 shadow-lg text-white text-3xl font-bold"><i class="fa-solid fa-gamepad"></i></div><h3 class="font-bold text-2xl text-gray-800 mb-1">Sandi Kata</h3><p class="text-xs text-purple-500 font-bold mb-4 bg-purple-50 inline-block px-3 py-1 rounded-full">Versi 1.3.0</p><div class="space-y-3 text-sm text-gray-600 border-t pt-4 border-gray-100"><div class="flex justify-between"><span class="text-gray-400">Pembuat</span><span class="font-bold text-gray-800">Riyan</span></div><div class="flex justify-between"><span class="text-gray-400">Asal</span><span class="font-bold text-gray-800 text-right">Sumatera Utara</span></div><div class="flex justify-between"><span class="text-gray-400">Rilis</span><span class="font-bold text-gray-800">2025</span></div></div><a href="https://wa.me/6282275894842?text=Saya%20sudah%20memainkan%20permainan%20Sandi%20Kata.%20Saya%20ingin%20membuat%20kritik%20dan%20saran%3A...." target="_blank" class="mt-6 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-2 rounded-xl font-bold text-sm w-full transition shadow-md"><i class="fa-brands fa-whatsapp text-lg"></i> Kritik & Saran</a></div></div>
     <div id="win-modal" class="modal-overlay hidden-force"><div class="bg-white p-8 rounded-3xl text-center shadow-2xl max-w-sm w-full animate-pop relative overflow-hidden"><div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style="background-image: radial-gradient(#FFD700 2px, transparent 2px); background-size: 20px 20px;"></div><div id="result-emoji" class="text-7xl mb-2 filter drop-shadow-md">🎉</div><h2 id="result-title" class="text-2xl font-bold text-gray-800 mb-1">LEVEL SELESAI</h2><div class="flex justify-center gap-2 mb-4 text-4xl py-2" id="modal-stars"></div><p id="result-msg" class="text-gray-500 mb-6 text-sm font-medium"></p><div class="flex flex-col gap-3"><button id="btn-next-level" onclick="nextLevel()" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-bold shadow-md hover:shadow-lg transition hidden-force">Lanjut Level Berikutnya</button><button onclick="restartLevel()" class="w-full bg-gray-100 text-gray-600 py-3 rounded-xl font-bold hover:bg-gray-200 transition">Main Ulang</button><button onclick="backToHome()" class="w-full text-gray-400 text-sm font-bold py-2 hover:text-gray-600">Kembali ke Menu</button></div></div></div>
     <div id="reset-modal" class="modal-overlay hidden-force" style="z-index: 120;"><div class="bg-white p-6 rounded-3xl text-center shadow-2xl max-w-xs w-full animate-pop border-t-4 border-red-500"><div class="text-5xl mb-3">⚠️</div><h3 class="font-bold text-xl text-gray-800">Hapus Semua Data?</h3><p class="text-gray-500 text-sm mb-6">Progress level dan bintang akan hilang permanen.</p><div class="flex gap-3"><button onclick="closeResetModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-xl font-bold">Batal</button><button onclick="confirmReset()" class="flex-1 bg-red-500 text-white py-2 rounded-xl font-bold">Hapus</button></div></div></div>
     <div id="error-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 110;"><div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-red-500 min-w-[280px] animate-pop max-w-xs"><div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-xmark text-3xl text-red-500"></i></div><h3 class="font-bold text-xl text-gray-800">Ups! Masih Salah</h3><p class="text-gray-500 text-sm mt-1 mb-4 text-center">Ada <b id="toast-count" class="text-red-500 text-lg"></b> kotak yang belum tepat.</p><button onclick="closeToast()" class="w-full bg-red-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-red-600 transition shadow-md">Coba Perbaiki</button></div></div>
     <div id="info-toast-wrapper" class="modal-overlay hidden-force" style="z-index: 9700;"><div class="bg-white px-8 py-6 rounded-3xl shadow-2xl flex flex-col items-center border-b-4 border-blue-500 min-w-[280px] animate-pop max-w-xs"><div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-info text-3xl text-blue-500"></i></div><h3 class="font-bold text-xl text-gray-800">Info</h3><p id="info-msg" class="text-gray-500 text-sm mt-1 mb-4 text-center"></p><button onclick="closeInfoToast()" class="w-full bg-blue-500 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-600 transition shadow-md">Mengerti</button></div></div>
 
     <script>
-        // --- DATA POOL SOAL ---
+        // --- DATA POOL SOAL (100 LEVEL) ---
         const LEVEL_DATA = [
-            { quote: "BHINNEKA TUNGGAL IKA", clues: [{icon:"🦅",q:"Lambang Negara",a:"GARUDA"}, {icon:"🏝️",q:"Pulau Dewata",a:"BALI"}, {icon:"👅",q:"Indra Pengecap",a:"LIDAH"}] },
-            { quote: "RAJIN PANGKAL PANDAI", clues: [{icon:"🦁",q:"Raja Hutan",a:"SINGA"}, {icon:"🌧️",q:"Air Langit",a:"HUJAN"}, {icon:"🚪",q:"Akses Masuk",a:"PINTU"}] },
-            { quote: "BERAKIT KE HULU", clues: [{icon:"🛶",q:"Perahu Kayu",a:"RAKIT"}, {icon:"🐟",q:"Bernapas Insang",a:"IKAN"}, {icon:"⛰️",q:"Dataran Tinggi",a:"BUKIT"}] },
-            { quote: "HEMAT PANGKAL KAYA", clues: [{icon:"💰",q:"Wadah Uang",a:"DOMPET"}, {icon:"🌙",q:"Cahaya Malam",a:"BULAN"}, {icon:"👀",q:"Indra Penglihat",a:"MATA"}] },
-            { quote: "MAJU TAK GENTAR", clues: [{icon:"⚔️",q:"Senjata Tajam",a:"PEDANG"}, {icon:"🔴",q:"Warna Darah",a:"MERAH"}, {icon:"👣",q:"Anggota Gerak",a:"KAKI"}] },
-            { quote: "AIR BERIAK TANDA TAK DALAM", clues: [{icon:"🌊",q:"Gelombang Air",a:"OMBAK"}, {icon:"⚓",q:"Parkir Kapal",a:"JANGKAR"}, {icon:"🚢",q:"Kendaraan Laut",a:"KAPAL"}] },
-            { quote: "DIMANA BUMI DIPIJAK", clues: [{icon:"🌍",q:"Planet Kita",a:"BUMI"}, {icon:"👞",q:"Alas Kaki",a:"SEPATU"}, {icon:"☁️",q:"Gumpalan Air",a:"AWAN"}] },
-            { quote: "SEDIKIT LAMA LAMA MENJADI BUKIT", clues: [{icon:"🐜",q:"Hewan Kecil",a:"SEMUT"}, {icon:"⏳",q:"Penunjuk Waktu",a:"JAM"}, {icon:"🏔️",q:"Gunung Kecil",a:"BUKIT"}] },
-            { quote: "BERSATU KITA TEGUH", clues: [{icon:"🤝",q:"Sapaan Tangan",a:"SALAM"}, {icon:"🏠",q:"Tempat Tinggal",a:"RUMAH"}, {icon:"🌳",q:"Tumbuhan Kayu",a:"POHON"}] },
-            { quote: "TUT WURI HANDAYANI", clues: [{icon:"🏫",q:"Tempat Belajar",a:"SEKOLAH"}, {icon:"📚",q:"Jendela Dunia",a:"BUKU"}, {icon:"✏️",q:"Alat Tulis",a:"PENSIL"}] },
-            { quote: "BERENANG RENANG KE TEPIAN", clues: [{icon:"🏊",q:"Olahraga Air",a:"RENANG"}, {icon:"🏖️",q:"Pinggir Laut",a:"PANTAI"}, {icon:"🐟",q:"Ikan Hias",a:"ARWANA"}, {icon:"🚤",q:"Perahu Cepat",a:"BOAT"}] },
-            { quote: "TONG KOSONG NYARING BUNYINYA", clues: [{icon:"🥁",q:"Alat Musik Pukul",a:"DRUM"}, {icon:"🔔",q:"Bunyi Sekolah",a:"BEL"}, {icon:"🦗",q:"Serangga",a:"JANGKRIK"}, {icon:"🎤",q:"Untuk Nyanyi",a:"MIKROFON"}] },
-            { quote: "SEDIA PAYUNG SEBELUM HUJAN", clues: [{icon:"☔",q:"Pelindung Hujan",a:"PAYUNG"}, {icon:"🔥",q:"Panas Membara",a:"API"}, {icon:"🌊",q:"Air Asin",a:"LAUT"}, {icon:"☁️",q:"Awan Gelap",a:"MENDUNG"}] },
-            { quote: "SEPERTI KATAK DALAM TEMPURUNG", clues: [{icon:"🐸",q:"Hewan Amfibi",a:"KATAK"}, {icon:"🥥",q:"Buah Santan",a:"KELAPA"}, {icon:"🌑",q:"Gelap Gulita",a:"MALAM"}, {icon:"🐢",q:"Hewan Cangkang",a:"KURA"}] },
-            { quote: "ADA GULA ADA SEMUT", clues: [{icon:"🐜",q:"Suka Manis",a:"SEMUT"}, {icon:"🍬",q:"Rasa Manis",a:"GULA"}, {icon:"🐝",q:"Penghasil Madu",a:"LEBAH"}, {icon:"🍰",q:"Kue Tart",a:"BOLU"}] },
-            { quote: "BUAH JATUH TAK JAUH DARI POHONNYA", clues: [{icon:"🍎",q:"Makanan Sehat",a:"BUAH"}, {icon:"🌲",q:"Hutan Pinus",a:"POHON"}, {icon:"🍂",q:"Gugur",a:"DAUN"}, {icon:"🌱",q:"Tunas",a:"BENIH"}] },
-            { quote: "BESAR PASAK DARIPADA TIANG", clues: [{icon:"🏗️",q:"Penyangga",a:"TIANG"}, {icon:"🔨",q:"Alat Tukang",a:"PALU"}, {icon:"🔩",q:"Pasangan Mur",a:"BAUT"}, {icon:"🏠",q:"Atap Rumah",a:"GENTENG"}] },
-            { quote: "PADI MAKIN BERISI MAKIN MERUNDUK", clues: [{icon:"🌾",q:"Bahan Nasi",a:"PADI"}, {icon:"🍚",q:"Makanan Pokok",a:"NASI"}, {icon:"👨‍🌾",q:"Orang Sawah",a:"PETANI"}, {icon:"🚜",q:"Bajak Sawah",a:"TRAKTOR"}] },
-            { quote: "ANJING MENGGONGGONG KAFILAH BERLALU", clues: [{icon:"🐕",q:"Hewan Penjaga",a:"ANJING"}, {icon:"🚶",q:"Berjalan Kaki",a:"JALAN"}, {icon:"🐫",q:"Hewan Gurun",a:"UNTA"}, {icon:"🌵",q:"Tanaman Gurun",a:"KAKTUS"}] },
-            { quote: "BAGAI PINANG DIBELAH DUA", clues: [{icon:"🌴",q:"Pohon Sejenis",a:"PINANG"}, {icon:"✌️",q:"Angka Jari",a:"DUA"}, {icon:"🔪",q:"Alat Potong",a:"PISAU"}, {icon:"🥥",q:"Isi Es Doger",a:"KELAPA"}] },
-            { quote: "SEPERTI AIR DENGAN MINYAK", clues: [{icon:"💧",q:"Cairan Kehidupan",a:"AIR"}, {icon:"🍳",q:"Untuk Goreng",a:"MINYAK"}, {icon:"🔥",q:"Lawan Air",a:"API"}, {icon:"🕯️",q:"Penerang Lilin",a:"CAHAYA"}] },
-            { quote: "KEBERSIHAN SEBAGIAN DARI IMAN", clues: [{icon:"🧹",q:"Alat Menyapu",a:"SAPU"}, {icon:"🗑️",q:"Tempat Buang",a:"SAMPAH"}, {icon:"🚿",q:"Mandi",a:"SABUN"}, {icon:"🕌",q:"Tempat Ibadah",a:"MASJID"}] },
-            { quote: "MALU BERTANYA SESAT DI JALAN", clues: [{icon:"🤔",q:"Sedang Bingung",a:"TANYA"}, {icon:"🗺️",q:"Penunjuk Arah",a:"PETA"}, {icon:"🛣️",q:"Jalan Tol",a:"JALAN"}, {icon:"🧭",q:"Arah Utara",a:"KOMPAS"}] },
-            { quote: "MENANG JADI ARANG KALAH JADI ABU", clues: [{icon:"🔥",q:"Sisa Bakaran",a:"ABU"}, {icon:"⚫",q:"Warna Gelap",a:"HITAM"}, {icon:"🏆",q:"Juara",a:"MENANG"}, {icon:"🪵",q:"Bahan Bakar",a:"ARANG"}] },
-            { quote: "HABIS MANIS SEPAH DIBUANG", clues: [{icon:"🍬",q:"Rasa Gula",a:"MANIS"}, {icon:"🗑️",q:"Tempat Kotoran",a:"TONG"}, {icon:"👄",q:"Alat Makan",a:"MULUT"}, {icon:"🍭",q:"Permen Batang",a:"LOLLIPOP"}] },
-            { quote: "MUSUH DALAM SELIMUT", clues: [{icon:"🛏️",q:"Penghangat",a:"SELIMUT"}, {icon:"⚔️",q:"Lawan Teman",a:"MUSUH"}, {icon:"💤",q:"Istirahat",a:"TIDUR"}, {icon:"🛌",q:"Kasur",a:"BANTAL"}] },
-            { quote: "NASI SUDAH MENJADI BUBUR", clues: [{icon:"🥣",q:"Nasi Lembek",a:"BUBUR"}, {icon:"🍚",q:"Beras Matang",a:"NASI"}, {icon:"🥄",q:"Alat Makan",a:"SENDOK"}, {icon:"🍲",q:"Sup Hangat",a:"KUAH"}] },
-            { quote: "SENJATA MAKAN TUAN", clues: [{icon:"🔫",q:"Alat Perang",a:"SENJATA"}, {icon:"🍽️",q:"Aktivitas Mulut",a:"MAKAN"}, {icon:"🤴",q:"Raja",a:"TUAN"}, {icon:"🛡️",q:"Pelindung",a:"TAMENG"}] },
-            { quote: "SETALI TIGA UANG", clues: [{icon:"💰",q:"Alat Tukar",a:"UANG"}, {icon:"3️⃣",q:"Angka Ganjil",a:"TIGA"}, {icon:"🪙",q:"Uang Logam",a:"KOIN"}, {icon:"💵",q:"Uang Kertas",a:"LEMBAR"}] },
-            { quote: "SUDAH JATUH TERTIMPA TANGGA", clues: [{icon:"🪜",q:"Alat Panjat",a:"TANGGA"}, {icon:"🤕",q:"Sakit Kepala",a:"PUSING"}, {icon:"⬇️",q:"Arah Bawah",a:"TURUN"}, {icon:"🩹",q:"P3K",a:"PERBAN"}] },
-            { quote: "TAK ADA GADING YANG TAK RETAK", clues: [{icon:"🐘",q:"Hewan Belalai",a:"GAJAH"}, {icon:"🦴",q:"Bagian Keras",a:"TULANG"}, {icon:"🥚",q:"Mudah Pecah",a:"TELUR"}, {icon:"🔨",q:"Pukul Paku",a:"PALU"}, {icon:"🦷",q:"Gigi Putih",a:"GADING"}] },
-            { quote: "AIR SUSU DIBALAS AIR TUBA", clues: [{icon:"🥛",q:"Minuman Sehat",a:"SUSU"}, {icon:"🐄",q:"Penghasil Susu",a:"SAPI"}, {icon:"☠️",q:"Tanda Bahaya",a:"RACUN"}, {icon:"🍼",q:"Botol Bayi",a:"DOT"}, {icon:"🧪",q:"Cairan Kimia",a:"TUBA"}] },
-            { quote: "JAUH DI MATA DEKAT DI HATI", clues: [{icon:"👀",q:"Indra Penglihat",a:"MATA"}, {icon:"❤️",q:"Organ Perasa",a:"HATI"}, {icon:"🔭",q:"Melihat Jauh",a:"TEROPONG"}, {icon:"👓",q:"Alat Baca",a:"KACAMATA"}, {icon:"💓",q:"Detak",a:"JANTUNG"}] },
-            { quote: "LEMPAR BATU SEMBUNYI TANGAN", clues: [{icon:"🪨",q:"Benda Keras",a:"BATU"}, {icon:"✋",q:"Anggota Tubuh",a:"TANGAN"}, {icon:"🙈",q:"Tidak Lihat",a:"SEMBUNYI"}, {icon:"⚾",q:"Lempar Bola",a:"BASEBALL"}, {icon:"🧤",q:"Sarung Tangan",a:"GLOVE"}] },
-            { quote: "PANDAI MEMBUNGKUS YANG BUSUK", clues: [{icon:"🎁",q:"Hadiah",a:"KADO"}, {icon:"🤢",q:"Bau Tak Sedap",a:"BUSUK"}, {icon:"🧠",q:"Organ Pikir",a:"OTAK"}, {icon:"📦",q:"Kardus",a:"KOTAK"}, {icon:"🗑️",q:"Sampah",a:"LIMBAH"}] },
-            { quote: "SEPANDAI PANDAI TUPAI MELOMPAT", clues: [{icon:"🐿️",q:"Hewan Pengerat",a:"TUPAI"}, {icon:"🦘",q:"Hewan Australia",a:"KANGURU"}, {icon:"🌲",q:"Tempat Tupai",a:"POHON"}, {icon:"🐇",q:"Lompat",a:"KELINCI"}, {icon:"🥜",q:"Makanan Tupai",a:"KENARI"}] },
-            { quote: "DIMANA ADA KEMAUAN DISITU ADA JALAN", clues: [{icon:"🛣️",q:"Tempat Kendaraan",a:"JALAN"}, {icon:"🧠",q:"Ingin Sesuatu",a:"MAU"}, {icon:"💪",q:"Kuat",a:"KUAT"}, {icon:"🚗",q:"Mobil",a:"RODA"}, {icon:"🏁",q:"Garis Akhir",a:"FINISH"}] },
-            { quote: "LAIN LADANG LAIN BELALANG", clues: [{icon:"🦗",q:"Serangga Hijau",a:"BELALANG"}, {icon:"🌾",q:"Tempat Tanam",a:"LADANG"}, {icon:"🐟",q:"Lain Lubuk...",a:"IKAN"}, {icon:"🦋",q:"Serangga Cantik",a:"KUPU"}, {icon:"🐛",q:"Ulat",a:"KEPOMPONG"}] },
-            { quote: "SAMBIL MENYELAM MINUM AIR", clues: [{icon:"🤿",q:"Berenang Dalam",a:"SELAM"}, {icon:"🥤",q:"Melepas Dahaga",a:"MINUM"}, {icon:"💧",q:"Zat Cair",a:"AIR"}, {icon:"🌊",q:"Ombak",a:"GELOMBANG"}, {icon:"🐟",q:"Bernapas Air",a:"INSANG"}] },
-            { quote: "SIAPA CEPAT DIA DAPAT", clues: [{icon:"🏃",q:"Lari Kencang",a:"CEPAT"}, {icon:"🎁",q:"Terima Sesuatu",a:"DAPAT"}, {icon:"🥇",q:"Juara Satu",a:"EMAS"}, {icon:"🏎️",q:"Balapan",a:"RACING"}, {icon:"⏱️",q:"Waktu",a:"DETIK"}] },
-            { quote: "TIADA ROTAN AKAR PUN JADI", clues: [{icon:"🪑",q:"Kursi Anyam",a:"ROTAN"}, {icon:"🌳",q:"Bawah Pohon",a:"AKAR"}, {icon:"🪵",q:"Batang",a:"KAYU"}, {icon:"🌿",q:"Tanaman",a:"TUMBUHAN"}, {icon:"🎋",q:"Bambu",a:"BULUH"}] },
-            { quote: "BAGAI AIR DI DAUN TALAS", clues: [{icon:"🍃",q:"Bagian Tanaman",a:"DAUN"}, {icon:"💧",q:"Benda Cair",a:"AIR"}, {icon:"🌱",q:"Tanaman Umbi",a:"TALAS"}, {icon:"☔",q:"Anti Air",a:"KALIS"}, {icon:"🌿",q:"Hijau",a:"KLOROFIL"}] },
-            { quote: "BURUK MUKA CERMIN DIBELAH", clues: [{icon:"🪞",q:"Alat Berkaca",a:"CERMIN"}, {icon:"🪓",q:"Membelah Kayu",a:"KAPAK"}, {icon:"😡",q:"Wajah Marah",a:"MUKA"}, {icon:"👹",q:"Seram",a:"HANTU"}, {icon:"💔",q:"Patah Hati",a:"RETAK"}] },
-            { quote: "DARIPADA HUJAN EMAS DI NEGERI ORANG", clues: [{icon:"🌧️",q:"Turun Air",a:"HUJAN"}, {icon:"🥇",q:"Logam Mulia",a:"EMAS"}, {icon:"🏙️",q:"Tempat Tinggal",a:"NEGERI"}, {icon:"👑",q:"Raja",a:"MAHKOTA"}, {icon:"🌍",q:"Dunia",a:"GLOBAL"}] },
-            { quote: "GALI LUBANG TUTUP LUBANG", clues: [{icon:"🕳️",q:"Tanah Bolong",a:"LUBANG"}, {icon:"⛏️",q:"Alat Gali",a:"CANGKUL"}, {icon:"🚪",q:"Buka Lawannya",a:"TUTUP"}, {icon:"💰",q:"Pinjaman",a:"HUTANG"}, {icon:"🚜",q:"Alat Berat",a:"BEKO"}] },
-            { quote: "HANGAT HANGAT TAHI AYAM", clues: [{icon:"🐓",q:"Hewan Berkokok",a:"AYAM"}, {icon:"💩",q:"Kotoran",a:"TAHI"}, {icon:"🔥",q:"Tidak Dingin",a:"HANGAT"}, {icon:"🍳",q:"Masak Telur",a:"GORENG"}, {icon:"🌡️",q:"Suhu",a:"PANAS"}] },
-            { quote: "JANGAN MEMANCING DI AIR KERUH", clues: [{icon:"🎣",q:"Cari Ikan",a:"MANCING"}, {icon:"🌫️",q:"Tidak Jernih",a:"KERUH"}, {icon:"💧",q:"Tempat Ikan",a:"AIR"}, {icon:"🐟",q:"Ikan Lele",a:"KUMIS"}, {icon:"🪣",q:"Wadah Air",a:"EMBER"}] },
-            { quote: "KACANG LUPA KULITNYA", clues: [{icon:"🥜",q:"Camilan Kulit",a:"KACANG"}, {icon:"🧥",q:"Pelindung Tubuh",a:"KULIT"}, {icon:"🧠",q:"Tidak Ingat",a:"LUPA"}, {icon:"🌰",q:"Biji",a:"BIJI"}, {icon:"🍫",q:"Coklat",a:"ALMOND"}] },
-            { quote: "LEBIH BAIK SATU BURUNG DI TANGAN", clues: [{icon:"🐦",q:"Hewan Terbang",a:"BURUNG"}, {icon:"✋",q:"Jari Lima",a:"TANGAN"}, {icon:"1️⃣",q:"Angka Awal",a:"SATU"}, {icon:"🦅",q:"Garuda",a:"ELANG"}, {icon:"🥚",q:"Anak Burung",a:"TELUR"}] },
-            { quote: "RUMPUT TETANGGA LEBIH HIJAU", clues: [{icon:"🌱",q:"Tanaman Pendek",a:"RUMPUT"}, {icon:"🏠",q:"Sebelah Rumah",a:"TETANGGA"}, {icon:"🟢",q:"Warna Daun",a:"HIJAU"}, {icon:"🐮",q:"Makan Rumput",a:"SAPI"}, {icon:"🏡",q:"Halaman",a:"TAMAN"}] }
+            { quote: "BHINNEKA TUNGGAL IKA", explanation: "Semboyan bangsa Indonesia yang tertulis pada lambang negara Garuda Pancasila. Artinya berbeda-beda tetapi tetap satu jua.", clues: [{icon:"🦅",q:"Lambang Negara",a:"GARUDA"}, {icon:"🏝️",q:"Pulau Dewata",a:"BALI"}, {icon:"👅",q:"Indra Pengecap",a:"LIDAH"}] },
+            { quote: "RAJIN PANGKAL PANDAI", explanation: "Orang yang rajin belajar akan menjadi pintar. Kebalikan dari 'Malas pangkal bodoh'.", clues: [{icon:"🦁",q:"Raja Hutan",a:"SINGA"}, {icon:"🌧️",q:"Air Langit",a:"HUJAN"}, {icon:"🚪",q:"Akses Masuk",a:"PINTU"}] },
+            { quote: "BERAKIT KE HULU", explanation: "Lengkapnya: Berakit-rakit ke hulu, berenang-renang ke tepian. Bersakit-sakit dahulu, bersenang-senang kemudian.", clues: [{icon:"🛶",q:"Perahu Kayu",a:"RAKIT"}, {icon:"🐟",q:"Bernapas Insang",a:"IKAN"}, {icon:"⛰️",q:"Dataran Tinggi",a:"BUKIT"}] },
+            { quote: "HEMAT PANGKAL KAYA", explanation: "Orang yang hidup hemat dan gemar menabung akan menjadi kaya di kemudian hari.", clues: [{icon:"💰",q:"Wadah Uang",a:"DOMPET"}, {icon:"🌙",q:"Cahaya Malam",a:"BULAN"}, {icon:"👀",q:"Indra Penglihat",a:"MATA"}] },
+            { quote: "MAJU TAK GENTAR", explanation: "Judul lagu nasional karya C. Simanjuntak yang membakar semangat perjuangan.", clues: [{icon:"⚔️",q:"Senjata Tajam",a:"PEDANG"}, {icon:"🔴",q:"Warna Darah",a:"MERAH"}, {icon:"👣",q:"Anggota Gerak",a:"KAKI"}] },
+            { quote: "AIR BERIAK TANDA TAK DALAM", explanation: "Orang yang banyak bicara atau sombong biasanya tidak berilmu.", clues: [{icon:"🌊",q:"Gelombang Air",a:"OMBAK"}, {icon:"⚓",q:"Parkir Kapal",a:"JANGKAR"}, {icon:"🚢",q:"Kendaraan Laut",a:"KAPAL"}] },
+            { quote: "DIMANA BUMI DIPIJAK", explanation: "Lengkapnya: Dimana bumi dipijak, disitu langit dijunjung. Kita harus menghormati adat istiadat tempat kita berada.", clues: [{icon:"🌍",q:"Planet Kita",a:"BUMI"}, {icon:"👞",q:"Alas Kaki",a:"SEPATU"}, {icon:"☁️",q:"Gumpalan Air",a:"AWAN"}] },
+            { quote: "SEDIKIT LAMA LAMA MENJADI BUKIT", explanation: "Usaha kecil yang dilakukan terus menerus lama-kelamaan akan memberikan hasil yang besar.", clues: [{icon:"🐜",q:"Hewan Kecil",a:"SEMUT"}, {icon:"⏳",q:"Penunjuk Waktu",a:"JAM"}, {icon:"🏔️",q:"Gunung Kecil",a:"BUKIT"}] },
+            { quote: "BERSATU KITA TEGUH", explanation: "Jika kita bersatu maka kita akan kuat, jika terpecah belah kita akan hancur/lemah.", clues: [{icon:"🤝",q:"Sapaan Tangan",a:"SALAM"}, {icon:"🏠",q:"Tempat Tinggal",a:"RUMAH"}, {icon:"🌳",q:"Tumbuhan Kayu",a:"POHON"}] },
+            { quote: "TUT WURI HANDAYANI", explanation: "Semboyan pendidikan Ki Hajar Dewantara. Artinya 'di belakang memberikan dorongan'.", clues: [{icon:"🏫",q:"Tempat Belajar",a:"SEKOLAH"}, {icon:"📚",q:"Jendela Dunia",a:"BUKU"}, {icon:"✏️",q:"Alat Tulis",a:"PENSIL"}] },
+             { quote: "BERENANG RENANG KE TEPIAN", explanation: "Lanjutan dari 'Berakit-rakit ke hulu'. Bermakna mencapai tujuan setelah berusaha.", clues: [{icon:"🏊",q:"Olahraga Air",a:"RENANG"}, {icon:"🏖️",q:"Pinggir Laut",a:"PANTAI"}, {icon:"🐟",q:"Ikan Hias",a:"ARWANA"}, {icon:"🚤",q:"Perahu Cepat",a:"BOAT"}] },
+            { quote: "TONG KOSONG NYARING BUNYINYA", explanation: "Orang yang bodoh biasanya banyak bicaranya.", clues: [{icon:"🥁",q:"Alat Musik Pukul",a:"DRUM"}, {icon:"🔔",q:"Bunyi Sekolah",a:"BEL"}, {icon:"🦗",q:"Serangga",a:"JANGKRIK"}, {icon:"🎤",q:"Untuk Nyanyi",a:"MIKROFON"}] },
+            { quote: "SEDIA PAYUNG SEBELUM HUJAN", explanation: "Bersiap-siaplah sebelum terjadinya suatu masalah atau bahaya.", clues: [{icon:"☔",q:"Pelindung Hujan",a:"PAYUNG"}, {icon:"🔥",q:"Panas Membara",a:"API"}, {icon:"🌊",q:"Air Asin",a:"LAUT"}, {icon:"☁️",q:"Awan Gelap",a:"MENDUNG"}] },
+            { quote: "SEPERTI KATAK DALAM TEMPURUNG", explanation: "Orang yang wawasannya sempit, tidak tahu dunia luar.", clues: [{icon:"🐸",q:"Hewan Amfibi",a:"KATAK"}, {icon:"🥥",q:"Buah Santan",a:"KELAPA"}, {icon:"🌑",q:"Gelap Gulita",a:"MALAM"}, {icon:"🐢",q:"Hewan Cangkang",a:"KURA"}] },
+            { quote: "ADA GULA ADA SEMUT", explanation: "Dimana ada kesenangan atau rezeki, disitu banyak orang datang.", clues: [{icon:"🐜",q:"Suka Manis",a:"SEMUT"}, {icon:"🍬",q:"Rasa Manis",a:"GULA"}, {icon:"🐝",q:"Penghasil Madu",a:"LEBAH"}, {icon:"🍰",q:"Kue Tart",a:"BOLU"}] },
+            { quote: "BUAH JATUH TAK JAUH DARI POHONNYA", explanation: "Sifat anak biasanya tidak jauh berbeda dengan sifat orang tuanya.", clues: [{icon:"🍎",q:"Makanan Sehat",a:"BUAH"}, {icon:"🌲",q:"Hutan Pinus",a:"POHON"}, {icon:"🍂",q:"Gugur",a:"DAUN"}, {icon:"🌱",q:"Tunas",a:"BENIH"}] },
+            { quote: "BESAR PASAK DARIPADA TIANG", explanation: "Pengeluaran lebih besar daripada pendapatan (boros).", clues: [{icon:"🏗️",q:"Penyangga",a:"TIANG"}, {icon:"🔨",q:"Alat Tukang",a:"PALU"}, {icon:"🔩",q:"Pasangan Mur",a:"BAUT"}, {icon:"🏠",q:"Atap Rumah",a:"GENTENG"}] },
+            { quote: "PADI MAKIN BERISI MAKIN MERUNDUK", explanation: "Semakin berilmu atau kaya seseorang, seharusnya semakin rendah hati.", clues: [{icon:"🌾",q:"Bahan Nasi",a:"PADI"}, {icon:"🍚",q:"Makanan Pokok",a:"NASI"}, {icon:"👨‍🌾",q:"Orang Sawah",a:"PETANI"}, {icon:"🚜",q:"Bajak Sawah",a:"TRAKTOR"}] },
+            { quote: "ANJING MENGGONGGONG KAFILAH BERLALU", explanation: "Biarpun banyak rintangan atau gunjingan, kita tetap terus berjalan mencapai tujuan.", clues: [{icon:"🐕",q:"Hewan Penjaga",a:"ANJING"}, {icon:"🚶",q:"Berjalan Kaki",a:"JALAN"}, {icon:"🐫",q:"Hewan Gurun",a:"UNTA"}, {icon:"🌵",q:"Tanaman Gurun",a:"KAKTUS"}] },
+            { quote: "BAGAI PINANG DIBELAH DUA", explanation: "Dua orang yang sangat mirip atau kembar.", clues: [{icon:"🌴",q:"Pohon Sejenis",a:"PINANG"}, {icon:"✌️",q:"Angka Jari",a:"DUA"}, {icon:"🔪",q:"Alat Potong",a:"PISAU"}, {icon:"🥥",q:"Isi Es Doger",a:"KELAPA"}] },
+             { quote: "SEPERTI AIR DENGAN MINYAK", explanation: "Dua hal atau orang yang tidak bisa bersatu/akur.", clues: [{icon:"💧",q:"Cairan Kehidupan",a:"AIR"}, {icon:"🍳",q:"Untuk Goreng",a:"MINYAK"}, {icon:"🔥",q:"Lawan Air",a:"API"}, {icon:"🕯️",q:"Penerang Lilin",a:"CAHAYA"}] },
+            { quote: "KEBERSIHAN SEBAGIAN DARI IMAN", explanation: "Menjaga kebersihan adalah salah satu bukti keimanan seseorang.", clues: [{icon:"🧹",q:"Alat Menyapu",a:"SAPU"}, {icon:"🗑️",q:"Tempat Buang",a:"SAMPAH"}, {icon:"🚿",q:"Mandi",a:"SABUN"}, {icon:"🕌",q:"Tempat Ibadah",a:"MASJID"}] },
+            { quote: "MALU BERTANYA SESAT DI JALAN", explanation: "Jika segan bertanya saat mengalami kesulitan, maka akan rugi sendiri.", clues: [{icon:"🤔",q:"Sedang Bingung",a:"TANYA"}, {icon:"🗺️",q:"Penunjuk Arah",a:"PETA"}, {icon:"🛣️",q:"Jalan Tol",a:"JALAN"}, {icon:"🧭",q:"Arah Utara",a:"KOMPAS"}] },
+            { quote: "MENANG JADI ARANG KALAH JADI ABU", explanation: "Pertengkaran yang tidak menguntungkan kedua belah pihak, sama-sama rugi.", clues: [{icon:"🔥",q:"Sisa Bakaran",a:"ABU"}, {icon:"⚫",q:"Warna Gelap",a:"HITAM"}, {icon:"🏆",q:"Juara",a:"MENANG"}, {icon:"🪵",q:"Bahan Bakar",a:"ARANG"}] },
+            { quote: "HABIS MANIS SEPAH DIBUANG", explanation: "Hanya dimanfaatkan saat perlu/senang, setelah tidak berguna ditinggalkan.", clues: [{icon:"🍬",q:"Rasa Gula",a:"MANIS"}, {icon:"🗑️",q:"Tempat Kotoran",a:"TONG"}, {icon:"👄",q:"Alat Makan",a:"MULUT"}, {icon:"🍭",q:"Permen Batang",a:"LOLLIPOP"}] },
+            { quote: "MUSUH DALAM SELIMUT", explanation: "Orang dekat (teman/keluarga) yang diam-diam berkhianat.", clues: [{icon:"🛏️",q:"Penghangat",a:"SELIMUT"}, {icon:"⚔️",q:"Lawan Teman",a:"MUSUH"}, {icon:"💤",q:"Istirahat",a:"TIDUR"}, {icon:"🛌",q:"Kasur",a:"BANTAL"}] },
+            { quote: "NASI SUDAH MENJADI BUBUR", explanation: "Sesuatu yang sudah terlanjur terjadi dan tidak bisa diubah lagi.", clues: [{icon:"🥣",q:"Nasi Lembek",a:"BUBUR"}, {icon:"🍚",q:"Beras Matang",a:"NASI"}, {icon:"🥄",q:"Alat Makan",a:"SENDOK"}, {icon:"🍲",q:"Sup Hangat",a:"KUAH"}] },
+            { quote: "SENJATA MAKAN TUAN", explanation: "Sesuatu yang direncanakan untuk mencelakakan orang lain, malah mengenai diri sendiri.", clues: [{icon:"🔫",q:"Alat Perang",a:"SENJATA"}, {icon:"🍽️",q:"Aktivitas Mulut",a:"MAKAN"}, {icon:"🤴",q:"Raja",a:"TUAN"}, {icon:"🛡️",q:"Pelindung",a:"TAMENG"}] },
+            { quote: "SETALI TIGA UANG", explanation: "Sama saja, tidak ada bedanya.", clues: [{icon:"💰",q:"Alat Tukar",a:"UANG"}, {icon:"3️⃣",q:"Angka Ganjil",a:"TIGA"}, {icon:"🪙",q:"Uang Logam",a:"KOIN"}, {icon:"💵",q:"Uang Kertas",a:"LEMBAR"}] },
+            { quote: "SUDAH JATUH TERTIMPA TANGGA", explanation: "Mendapat kesialan atau musibah secara berturut-turut.", clues: [{icon:"🪜",q:"Alat Panjat",a:"TANGGA"}, {icon:"🤕",q:"Sakit Kepala",a:"PUSING"}, {icon:"⬇️",q:"Arah Bawah",a:"TURUN"}, {icon:"🩹",q:"P3K",a:"PERBAN"}] },
+             { quote: "TAK ADA GADING YANG TAK RETAK", explanation: "Tidak ada sesuatu atau seseorang yang sempurna di dunia ini.", clues: [{icon:"🐘",q:"Hewan Belalai",a:"GAJAH"}, {icon:"🦴",q:"Bagian Keras",a:"TULANG"}, {icon:"🥚",q:"Mudah Pecah",a:"TELUR"}, {icon:"🔨",q:"Pukul Paku",a:"PALU"}, {icon:"🦷",q:"Gigi Putih",a:"GADING"}] },
+            { quote: "AIR SUSU DIBALAS AIR TUBA", explanation: "Kebaikan yang dibalas dengan kejahatan.", clues: [{icon:"🥛",q:"Minuman Sehat",a:"SUSU"}, {icon:"🐄",q:"Penghasil Susu",a:"SAPI"}, {icon:"☠️",q:"Tanda Bahaya",a:"RACUN"}, {icon:"🍼",q:"Botol Bayi",a:"DOT"}, {icon:"🧪",q:"Cairan Kimia",a:"TUBA"}] },
+            { quote: "JAUH DI MATA DEKAT DI HATI", explanation: "Walaupun berjauhan jarak, tetapi selalu teringat di hati.", clues: [{icon:"👀",q:"Indra Penglihat",a:"MATA"}, {icon:"❤️",q:"Organ Perasa",a:"HATI"}, {icon:"🔭",q:"Melihat Jauh",a:"TEROPONG"}, {icon:"👓",q:"Alat Baca",a:"KACAMATA"}, {icon:"💓",q:"Detak",a:"JANTUNG"}] },
+            { quote: "LEMPAR BATU SEMBUNYI TANGAN", explanation: "Melakukan perbuatan buruk tetapi pura-pura tidak tahu.", clues: [{icon:"🪨",q:"Benda Keras",a:"BATU"}, {icon:"✋",q:"Anggota Tubuh",a:"TANGAN"}, {icon:"🙈",q:"Tidak Lihat",a:"SEMBUNYI"}, {icon:"⚾",q:"Lempar Bola",a:"BASEBALL"}, {icon:"🧤",q:"Sarung Tangan",a:"GLOVE"}] },
+            { quote: "PANDAI MEMBUNGKUS YANG BUSUK", explanation: "Pandai menutupi kejahatan atau keburukan agar terlihat baik.", clues: [{icon:"🎁",q:"Hadiah",a:"KADO"}, {icon:"🤢",q:"Bau Tak Sedap",a:"BUSUK"}, {icon:"🧠",q:"Organ Pikir",a:"OTAK"}, {icon:"📦",q:"Kardus",a:"KOTAK"}, {icon:"🗑️",q:"Sampah",a:"LIMBAH"}] },
+            { quote: "SEPANDAI PANDAI TUPAI MELOMPAT", explanation: "Lengkapnya: Sepandai-pandai tupai melompat, akhirnya jatuh juga. Tidak ada orang yang sempurna, sepintar apapun pasti pernah salah.", clues: [{icon:"🐿️",q:"Hewan Pengerat",a:"TUPAI"}, {icon:"🦘",q:"Hewan Australia",a:"KANGURU"}, {icon:"🌲",q:"Tempat Tupai",a:"POHON"}, {icon:"🐇",q:"Lompat",a:"KELINCI"}, {icon:"🥜",q:"Makanan Tupai",a:"KENARI"}] },
+            { quote: "DIMANA ADA KEMAUAN DISITU ADA JALAN", explanation: "Jika kita bersungguh-sungguh ingin mencapai sesuatu, pasti akan ada caranya.", clues: [{icon:"🛣️",q:"Tempat Kendaraan",a:"JALAN"}, {icon:"🧠",q:"Ingin Sesuatu",a:"MAU"}, {icon:"💪",q:"Kuat",a:"KUAT"}, {icon:"🚗",q:"Mobil",a:"RODA"}, {icon:"🏁",q:"Garis Akhir",a:"FINISH"}] },
+            { quote: "LAIN LADANG LAIN BELALANG", explanation: "Setiap daerah memiliki adat istiadat yang berbeda.", clues: [{icon:"🦗",q:"Serangga Hijau",a:"BELALANG"}, {icon:"🌾",q:"Tempat Tanam",a:"LADANG"}, {icon:"🐟",q:"Lain Lubuk...",a:"IKAN"}, {icon:"🦋",q:"Serangga Cantik",a:"KUPU"}, {icon:"🐛",q:"Ulat",a:"KEPOMPONG"}] },
+            { quote: "SAMBIL MENYELAM MINUM AIR", explanation: "Mengerjakan dua atau tiga pekerjaan sekaligus dalam satu waktu.", clues: [{icon:"🤿",q:"Berenang Dalam",a:"SELAM"}, {icon:"🥤",q:"Melepas Dahaga",a:"MINUM"}, {icon:"💧",q:"Zat Cair",a:"AIR"}, {icon:"🌊",q:"Ombak",a:"GELOMBANG"}, {icon:"🐟",q:"Bernapas Air",a:"INSANG"}] },
+            { quote: "SIAPA CEPAT DIA DAPAT", explanation: "Orang yang lebih dulu bertindak akan mendapatkan hasilnya.", clues: [{icon:"🏃",q:"Lari Kencang",a:"CEPAT"}, {icon:"🎁",q:"Terima Sesuatu",a:"DAPAT"}, {icon:"🥇",q:"Juara Satu",a:"EMAS"}, {icon:"🏎️",q:"Balapan",a:"RACING"}, {icon:"⏱️",q:"Waktu",a:"DETIK"}] },
+            { quote: "TIADA ROTAN AKAR PUN JADI", explanation: "Jika tidak ada yang bagus, yang kurang bagus pun boleh dipakai (alternatif).", clues: [{icon:"🪑",q:"Kursi Anyam",a:"ROTAN"}, {icon:"🌳",q:"Bawah Pohon",a:"AKAR"}, {icon:"🪵",q:"Batang",a:"KAYU"}, {icon:"🌿",q:"Tanaman",a:"TUMBUHAN"}, {icon:"🎋",q:"Bambu",a:"BULUH"}] },
+            { quote: "BAGAI AIR DI DAUN TALAS", explanation: "Orang yang tidak punya pendirian tetap, selalu berubah-ubah.", clues: [{icon:"🍃",q:"Bagian Tanaman",a:"DAUN"}, {icon:"💧",q:"Benda Cair",a:"AIR"}, {icon:"🌱",q:"Tanaman Umbi",a:"TALAS"}, {icon:"☔",q:"Anti Air",a:"KALIS"}, {icon:"🌿",q:"Hijau",a:"KLOROFIL"}] },
+            { quote: "BURUK MUKA CERMIN DIBELAH", explanation: "Menyalahkan orang lain atau keadaan atas kesalahan sendiri.", clues: [{icon:"🪞",q:"Alat Berkaca",a:"CERMIN"}, {icon:"🪓",q:"Membelah Kayu",a:"KAPAK"}, {icon:"😡",q:"Wajah Marah",a:"MUKA"}, {icon:"👹",q:"Seram",a:"HANTU"}, {icon:"💔",q:"Patah Hati",a:"RETAK"}] },
+            { quote: "DARIPADA HUJAN EMAS DI NEGERI ORANG", explanation: "Lebih baik hujan batu di negeri sendiri. Sebaik-baiknya negeri orang, lebih baik negeri sendiri.", clues: [{icon:"🌧️",q:"Turun Air",a:"HUJAN"}, {icon:"🥇",q:"Logam Mulia",a:"EMAS"}, {icon:"🏙️",q:"Tempat Tinggal",a:"NEGERI"}, {icon:"👑",q:"Raja",a:"MAHKOTA"}, {icon:"🌍",q:"Dunia",a:"GLOBAL"}] },
+            { quote: "GALI LUBANG TUTUP LUBANG", explanation: "Berhutang untuk membayar hutang yang lain.", clues: [{icon:"🕳️",q:"Tanah Bolong",a:"LUBANG"}, {icon:"⛏️",q:"Alat Gali",a:"CANGKUL"}, {icon:"🚪",q:"Buka Lawannya",a:"TUTUP"}, {icon:"💰",q:"Pinjaman",a:"HUTANG"}, {icon:"🚜",q:"Alat Berat",a:"BEKO"}] },
+            { quote: "HANGAT HANGAT TAHI AYAM", explanation: "Semangat yang hanya di awal saja, lama-lama luntur.", clues: [{icon:"🐓",q:"Hewan Berkokok",a:"AYAM"}, {icon:"💩",q:"Kotoran",a:"TAHI"}, {icon:"🔥",q:"Tidak Dingin",a:"HANGAT"}, {icon:"🍳",q:"Masak Telur",a:"GORENG"}, {icon:"🌡️",q:"Suhu",a:"PANAS"}] },
+            { quote: "JANGAN MEMANCING DI AIR KERUH", explanation: "Jangan mengambil keuntungan di situasi yang sedang kacau.", clues: [{icon:"🎣",q:"Cari Ikan",a:"MANCING"}, {icon:"🌫️",q:"Tidak Jernih",a:"KERUH"}, {icon:"💧",q:"Tempat Ikan",a:"AIR"}, {icon:"🐟",q:"Ikan Lele",a:"KUMIS"}, {icon:"🪣",q:"Wadah Air",a:"EMBER"}] },
+            { quote: "KACANG LUPA KULITNYA", explanation: "Orang yang lupa akan asal-usulnya setelah menjadi sukses/kaya.", clues: [{icon:"🥜",q:"Camilan Kulit",a:"KACANG"}, {icon:"🧥",q:"Pelindung Tubuh",a:"KULIT"}, {icon:"🧠",q:"Tidak Ingat",a:"LUPA"}, {icon:"🌰",q:"Biji",a:"BIJI"}, {icon:"🍫",q:"Coklat",a:"ALMOND"}] },
+            { quote: "LEBIH BAIK SATU BURUNG DI TANGAN", explanation: "Daripada sepuluh burung di pohon. Syukuri apa yang sudah pasti dimiliki.", clues: [{icon:"🐦",q:"Hewan Terbang",a:"BURUNG"}, {icon:"✋",q:"Jari Lima",a:"TANGAN"}, {icon:"1️⃣",q:"Angka Awal",a:"SATU"}, {icon:"🦅",q:"Garuda",a:"ELANG"}, {icon:"🥚",q:"Anak Burung",a:"TELUR"}] },
+            { quote: "RUMPUT TETANGGA LEBIH HIJAU", explanation: "Milik orang lain seringkali terlihat lebih baik/indah daripada milik sendiri.", clues: [{icon:"🌱",q:"Tanaman Pendek",a:"RUMPUT"}, {icon:"🏠",q:"Sebelah Rumah",a:"TETANGGA"}, {icon:"🟢",q:"Warna Daun",a:"HIJAU"}, {icon:"🐮",q:"Makan Rumput",a:"SAPI"}, {icon:"🏡",q:"Halaman",a:"TAMAN"}] },
+            { quote: "BUMI ITU BULAT", explanation: "Fakta ilmiah dasar tentang bentuk planet kita.", clues: [{icon:"🌍",q:"Planet",a:"BUMI"}, {icon:"⚽",q:"Bentuk Bola",a:"BULAT"}, {icon:"🌑",q:"Satelit Bumi",a:"BULAN"}] },
+            { quote: "MATAHARI TERBIT DI TIMUR", explanation: "Arah pergerakan semu matahari.", clues: [{icon:"☀️",q:"Pusat Tata Surya",a:"MATAHARI"}, {icon:"🧭",q:"Arah Kanan Peta",a:"TIMUR"}, {icon:"🌅",q:"Pagi Hari",a:"TERBIT"}] },
+            { quote: "INDONESIA TANAH AIRKU", explanation: "Penggalan lagu kebangsaan Indonesia Raya.", clues: [{icon:"🇮🇩",q:"Negara Kita",a:"INDONESIA"}, {icon:"⛰️",q:"Pijakan",a:"TANAH"}, {icon:"💧",q:"Sumber Minum",a:"AIR"}] },
+            { quote: "MERAH PUTIH BENDERA KITA", explanation: "Warna bendera negara Indonesia.", clues: [{icon:"🟥",q:"Warna Berani",a:"MERAH"}, {icon:"⬜",q:"Warna Suci",a:"PUTIH"}, {icon:"🚩",q:"Lambang Kain",a:"BENDERA"}] },
+            { quote: "PANCASILA DASAR NEGARA", explanation: "Ideologi dasar bagi negara Indonesia.", clues: [{icon:"🦅",q:"Burung Lambang",a:"PANCASILA"}, {icon:"🏗️",q:"Fondasi",a:"DASAR"}, {icon:"🏛️",q:"Institusi",a:"NEGARA"}] },
+            { quote: "PRESIDEN PERTAMA SOEKARNO", explanation: "Bapak Proklamator Indonesia.", clues: [{icon:"👨‍💼",q:"Pemimpin Negara",a:"PRESIDEN"}, {icon:"1️⃣",q:"Urutan Awal",a:"PERTAMA"}, {icon:"🎙️",q:"Proklamator",a:"SOEKARNO"}] },
+            { quote: "IBUKOTA JAKARTA", explanation: "Pusat pemerintahan Indonesia saat ini.", clues: [{icon:"🏙️",q:"Kota Pusat",a:"IBUKOTA"}, {icon:"🏢",q:"Monas Ada Di",a:"JAKARTA"}, {icon:"🚌",q:"Trans...",a:"BUS"}] },
+            { quote: "IKAN BERNAPAS DENGAN INSANG", explanation: "Sistem pernapasan hewan air.", clues: [{icon:"🐟",q:"Hewan Air",a:"IKAN"}, {icon:"🫁",q:"Menghirup O2",a:"NAPAS"}, {icon:"🐠",q:"Alat Napas Ikan",a:"INSANG"}] },
+            { quote: "BURUNG TERBANG DENGAN SAYAP", explanation: "Cara bergerak hewan aves.", clues: [{icon:"🐦",q:"Hewan Udara",a:"BURUNG"}, {icon:"✈️",q:"Aksi Pesawat",a:"TERBANG"}, {icon:"🪶",q:"Alat Terbang",a:"SAYAP"}] },
+            { quote: "ULAR TIDAK PUNYA KAKI", explanation: "Ciri fisik hewan reptil melata.", clues: [{icon:"🐍",q:"Hewan Melata",a:"ULAR"}, {icon:"❌",q:"Tidak Ada",a:"TIADA"}, {icon:"👣",q:"Alat Jalan",a:"KAKI"}] },
+            { quote: "GULA RASANYA MANIS", explanation: "Rasa dasar dari sukrosa.", clues: [{icon:"🍬",q:"Pemanis",a:"GULA"}, {icon:"👅",q:"Indra Pengecap",a:"RASA"}, {icon:"🍭",q:"Rasa Permen",a:"MANIS"}] },
+            { quote: "GARAM RASANYA ASIN", explanation: "Rasa dasar dari natrium klorida.", clues: [{icon:"🧂",q:"Bumbu Putih",a:"GARAM"}, {icon:"🌊",q:"Air Laut",a:"ASIN"}, {icon:"🍳",q:"Masak",a:"DAPUR"}] },
+            { quote: "CABAI RASANYA PEDAS", explanation: "Sensasi panas di lidah akibat capsaicin.", clues: [{icon:"🌶️",q:"Bumbu Merah",a:"CABAI"}, {icon:"🥵",q:"Rasa Panas",a:"PEDAS"}, {icon:"🔥",q:"Terbakar",a:"HOT"}] },
+            { quote: "ES BATU ITU DINGIN", explanation: "Sifat fisik air yang membeku.", clues: [{icon:"🧊",q:"Air Beku",a:"ES"}, {icon:"🪨",q:"Keras",a:"BATU"}, {icon:"🥶",q:"Suhu Rendah",a:"DINGIN"}] },
+            { quote: "API ITU PANAS", explanation: "Sifat fisik dari pembakaran.", clues: [{icon:"🔥",q:"Merah Membara",a:"API"}, {icon:"🌡️",q:"Suhu Tinggi",a:"PANAS"}, {icon:"🕯️",q:"Lilin",a:"BAKAR"}] },
+            { quote: "RODA BERBENTUK LINGKARAN", explanation: "Bentuk geometris alat gerak kendaraan.", clues: [{icon:"🚗",q:"Kaki Mobil",a:"RODA"}, {icon:"📐",q:"Wujud",a:"BENTUK"}, {icon:"⭕",q:"Bulat",a:"LINGKARAN"}] },
+            { quote: "SEGITIGA MEMPUNYAI TIGA SISI", explanation: "Sifat bangun datar trigon.", clues: [{icon:"🔺",q:"Bangun Datar",a:"SEGITIGA"}, {icon:"3️⃣",q:"Jumlah",a:"TIGA"}, {icon:"📏",q:"Pinggiran",a:"SISI"}] },
+            { quote: "SATU MINGGU TUJUH HARI", explanation: "Jumlah hari dalam sepekan.", clues: [{icon:"📅",q:"Kalender",a:"MINGGU"}, {icon:"7️⃣",q:"Angka",a:"TUJUH"}, {icon:"☀️",q:"Siang",a:"HARI"}] },
+            { quote: "SATU TAHUN DUA BELAS BULAN", explanation: "Jumlah bulan dalam setahun masehi.", clues: [{icon:"📆",q:"Periode Lama",a:"TAHUN"}, {icon:"1️⃣",q:"Satu Dua",a:"DUA"}, {icon:"🌕",q:"Satelit",a:"BULAN"}] },
+            { quote: "MOBIL BERJALAN DI DARAT", explanation: "Mode transportasi darat.", clues: [{icon:"🚗",q:"Kendaraan",a:"MOBIL"}, {icon:"🚶",q:"Bergerak",a:"JALAN"}, {icon:"⛰️",q:"Bukan Laut",a:"DARAT"}] },
+            { quote: "KAPAL BERLAYAR DI LAUT", explanation: "Mode transportasi air.", clues: [{icon:"🚢",q:"Kendaraan Air",a:"KAPAL"}, {icon:"⛵",q:"Aksi Perahu",a:"LAYAR"}, {icon:"🌊",q:"Air Asin",a:"LAUT"}] },
+            { quote: "PESAWAT TERBANG DI UDARA", explanation: "Mode transportasi udara.", clues: [{icon:"✈️",q:"Kendaraan Sayap",a:"PESAWAT"}, {icon:"☁️",q:"Awan",a:"UDARA"}, {icon:"🦅",q:"Seperti Burung",a:"TERBANG"}] },
+            { quote: "KERETA API BERJALAN DI REL", explanation: "Jalur khusus kereta.", clues: [{icon:"🚂",q:"Gerbong",a:"KERETA"}, {icon:"🔥",q:"Bahan Bakar Lama",a:"API"}, {icon:"🛤️",q:"Jalan Besi",a:"REL"}] },
+            { quote: "DOKTER BEKERJA DI RUMAH SAKIT", explanation: "Profesi kesehatan.", clues: [{icon:"👨‍⚕️",q:"Penyembuh",a:"DOKTER"}, {icon:"💼",q:"Cari Nafkah",a:"KERJA"}, {icon:"🏥",q:"Gedung Medis",a:"SAKIT"}] },
+            { quote: "GURU MENGAJAR DI SEKOLAH", explanation: "Profesi pendidikan.", clues: [{icon:"👨‍🏫",q:"Pendidik",a:"GURU"}, {icon:"📚",q:"Memberi Ilmu",a:"AJAR"}, {icon:"🏫",q:"Gedung Belajar",a:"SEKOLAH"}] },
+            { quote: "POLISI MENGATUR LALU LINTAS", explanation: "Tugas aparat di jalan raya.", clues: [{icon:"👮",q:"Aparat",a:"POLISI"}, {icon:"🚦",q:"Lampu Jalan",a:"LINTAS"}, {icon:"🛣️",q:"Jalan Raya",a:"LALU"}] },
+            { quote: "PETANI MENANAM PADI DI SAWAH", explanation: "Profesi agraris.", clues: [{icon:"👨‍🌾",q:"Penanam",a:"PETANI"}, {icon:"🌱",q:"Taruh Benih",a:"TANAM"}, {icon:"🌾",q:"Ladang Air",a:"SAWAH"}] },
+            { quote: "NELAYAN MENANGKAP IKAN DI LAUT", explanation: "Profesi maritim.", clues: [{icon:"🎣",q:"Pencari Ikan",a:"NELAYAN"}, {icon:"🐟",q:"Hewan Air",a:"IKAN"}, {icon:"🌊",q:"Samudra",a:"LAUT"}] },
+            { quote: "AYAM MENGHASILKAN TELUR", explanation: "Sumber protein hewani.", clues: [{icon:"🐓",q:"Unggas",a:"AYAM"}, {icon:"🥚",q:"Oval Putih",a:"TELUR"}, {icon:"🏭",q:"Produksi",a:"HASIL"}] },
+            { quote: "SAPI MENGHASILKAN SUSU", explanation: "Sumber kalsium hewani.", clues: [{icon:"🐄",q:"Hewan Moo",a:"SAPI"}, {icon:"🥛",q:"Minuman Putih",a:"SUSU"}, {icon:"🥩",q:"Daging",a:"HASIL"}] },
+            { quote: "LEBAH MENGHASILKAN MADU", explanation: "Cairan manis dari sarang lebah.", clues: [{icon:"🐝",q:"Serangga Sengat",a:"LEBAH"}, {icon:"🍯",q:"Cairan Manis",a:"MADU"}, {icon:"🌼",q:"Bunga",a:"SARI"}] },
+            { quote: "ULAT SUTRA MENGHASILKAN BENANG", clues: [{icon:"🐛",q:"Hewan Daun",a:"ULAT"}, {icon:"🧵",q:"Bahan Kain",a:"BENANG"}, {icon:"👘",q:"Kain Halus",a:"SUTRA"}] },
+            { quote: "POHON JATI KAYUNYA KUAT", explanation: "Jenis kayu berkualitas tinggi.", clues: [{icon:"🌳",q:"Tanaman Besar",a:"POHON"}, {icon:"🪵",q:"Bahan Mebel",a:"KAYU"}, {icon:"💪",q:"Tahan Lama",a:"KUAT"}] },
+            { quote: "BUNGA MAWAR BERDURI", explanation: "Ciri khas tanaman mawar.", clues: [{icon:"🌹",q:"Merah Wangi",a:"MAWAR"}, {icon:"🌵",q:"Tajam",a:"DURI"}, {icon:"🌸",q:"Tanaman Indah",a:"BUNGA"}] },
+            { quote: "BUAH DURIAN BAUNYA MENYENGAT", explanation: "Raja buah dengan aroma khas.", clues: [{icon:"🍈",q:"Raja Buah",a:"DURIAN"}, {icon:"👃",q:"Aroma",a:"BAU"}, {icon:"🦨",q:"Tajam",a:"SENGAT"}] },
+            { quote: "MATAHARI TERBENAM DI BARAT", explanation: "Akhir hari.", clues: [{icon:"☀️",q:"Surya",a:"MATAHARI"}, {icon:"🌇",q:"Sore",a:"BENAM"}, {icon:"🧭",q:"Arah Kiri Peta",a:"BARAT"}] },
+            { quote: "BULAN BERSINAR DI MALAM HARI", explanation: "Penerang alami malam.", clues: [{icon:"🌙",q:"Satelit",a:"BULAN"}, {icon:"✨",q:"Cahaya",a:"SINAR"}, {icon:"🌑",q:"Gelap",a:"MALAM"}] },
+            { quote: "BINTANG BERKELIP DI LANGIT", explanation: "Benda langit bercahaya sendiri.", clues: [{icon:"⭐",q:"Star",a:"BINTANG"}, {icon:"✨",q:"Kedip",a:"KELIP"}, {icon:"☁️",q:"Atas",a:"LANGIT"}] },
+            { quote: "PELANGI MUNCUL SETELAH HUJAN", explanation: "Fenomena pembiasan cahaya.", clues: [{icon:"🌈",q:"Warna Warni",a:"PELANGI"}, {icon:"🌧️",q:"Air Turun",a:"HUJAN"}, {icon:"👀",q:"Tampak",a:"MUNCUL"}] },
+            { quote: "GUNUNG MELETUS MENGELUARKAN LAHAR", explanation: "Aktivitas vulkanik.", clues: [{icon:"🌋",q:"Erupsi",a:"MELETUS"}, {icon:"🔥",q:"Cairan Panas",a:"LAHAR"}, {icon:"⛰️",q:"Bukit Besar",a:"GUNUNG"}] },
+            { quote: "GEMPA BUMI MENGGUNCANG TANAH", explanation: "Aktivitas tektonik.", clues: [{icon:"🏚️",q:"Bencana",a:"GEMPA"}, {icon:"🌍",q:"Planet",a:"BUMI"}, {icon:"😵",q:"Goyang",a:"GUNCANG"}] },
+            { quote: "BANJIR DISEBABKAN OLEH SAMPAH", explanation: "Penyebab umum banjir di kota.", clues: [{icon:"🌊",q:"Air Naik",a:"BANJIR"}, {icon:"🗑️",q:"Kotoran",a:"SAMPAH"}, {icon:"🏘️",q:"Genangan",a:"SEBAB"}] },
+            { quote: "MEMBUANG SAMPAH PADA TEMPATNYA", explanation: "Kebiasaan baik menjaga lingkungan.", clues: [{icon:"🗑️",q:"Tong",a:"TEMPAT"}, {icon:"🚯",q:"Jangan Sembarangan",a:"BUANG"}, {icon:"🧃",q:"Bekas",a:"SAMPAH"}] },
+            { quote: "MENGGOSOK GIGI DUA KALI SEHARI", explanation: "Menjaga kesehatan mulut.", clues: [{icon:"🪥",q:"Sikat",a:"GOSOK"}, {icon:"🦷",q:"Tulang Mulut",a:"GIGI"}, {icon:"2️⃣",q:"Jumlah",a:"DUA"}] },
+            { quote: "MENCUCI TANGAN SEBELUM MAKAN", explanation: "Menjaga kebersihan diri.", clues: [{icon:"🧼",q:"Bersih Air",a:"CUCI"}, {icon:"✋",q:"Jari",a:"TANGAN"}, {icon:"🍽️",q:"Santap",a:"MAKAN"}] },
+            { quote: "OLAHRAGA MEMBUAT TUBUH SEHAT", explanation: "Manfaat aktivitas fisik.", clues: [{icon:"🏃",q:"Gerak Badan",a:"RAGA"}, {icon:"💪",q:"Kuat",a:"SEHAT"}, {icon:"🧍",q:"Badan",a:"TUBUH"}] },
+            { quote: "MAKAN SAYUR AGAR KUAT", explanation: "Gizi seimbang.", clues: [{icon:"🥦",q:"Makanan Hijau",a:"SAYUR"}, {icon:"🍽️",q:"Kunyah",a:"MAKAN"}, {icon:"🏋️",q:"Bertenaga",a:"KUAT"}] },
+            { quote: "MINUM AIR PUTIH DELAPAN GELAS", explanation: "Kebutuhan cairan harian.", clues: [{icon:"🥤",q:"Tenggak",a:"MINUM"}, {icon:"💧",q:"Bening",a:"AIR"}, {icon:"8️⃣",q:"Jumlah",a:"DELAPAN"}] },
+            { quote: "TIDUR YANG CUKUP", explanation: "Istirahat untuk pemulihan.", clues: [{icon:"💤",q:"Bobo",a:"TIDUR"}, {icon:"👍",q:"Pas",a:"CUKUP"}, {icon:"🛏️",q:"Kasur",a:"BARING"}] },
+            { quote: "BELAJAR DENGAN GIAT", explanation: "Kunci kesuksesan siswa.", clues: [{icon:"📖",q:"Baca Buku",a:"BELAJAR"}, {icon:"🔥",q:"Semangat",a:"GIAT"}, {icon:"🎓",q:"Pintar",a:"SUKSES"}] }
         ];
 
         // --- GAME STATE ---
@@ -449,6 +455,19 @@
         function openAboutModal() { playPopSound(); document.getElementById('about-modal').classList.remove('hidden-force'); }
         function closeAboutModal() { playPopSound(); document.getElementById('about-modal').classList.add('hidden-force'); }
 
+        // EXPLANATION LOGIC
+        function showExplanation() {
+            const data = LEVEL_DATA[currentLevelIdx % LEVEL_DATA.length];
+            const text = data.explanation || "Selamat! Kamu berhasil menyelesaikan level ini.";
+            document.getElementById('explanation-content').innerText = text;
+            playPopSound();
+            document.getElementById('explanation-modal').classList.remove('hidden-force');
+        }
+        function closeExplanationModal() {
+            playPopSound();
+            document.getElementById('explanation-modal').classList.add('hidden-force');
+        }
+
         const bgmSlider = document.getElementById('bgm-slider'); const sfxSlider = document.getElementById('sfx-slider');
         const audioAccordionBtn = document.getElementById('audio-accordion-btn'); const audioSlidersPanel = document.getElementById('audio-sliders-panel');
         const masterMuteToggle = document.getElementById('master-mute-toggle');
@@ -477,7 +496,7 @@
             const totalStars = Object.values(userProgress.stars).reduce((a, b) => a + b, 0);
             document.getElementById('total-stars-fixed').innerText = totalStars;
             const container = document.getElementById('level-container'); container.innerHTML = '';
-            for (let i = 1; i <= 50; i++) {
+            for (let i = 1; i <= 100; i++) {
                 const box = document.createElement('div'); const starsCount = userProgress.stars[i] || 0;
                 const requiredStars = (i === 1) ? 0 : (i - 1) * 2; const isUnlocked = totalStars >= requiredStars;
                 let classes = "level-box"; let content = "";
@@ -499,58 +518,25 @@
             document.getElementById('total-stars-fixed').innerText = totalStars;
         }
 
-        // --- ANIMASI TRANSISI LEVEL ---
-        // Fungsi baru untuk menangani animasi fade
-        function transitionLevel(callback) {
-            const gameScreen = document.getElementById('game-screen');
-            const homeScreen = document.getElementById('home-screen');
-            
-            // Tentukan screen mana yang aktif
-            const activeScreen = gameScreen.classList.contains('hidden-force') ? homeScreen : gameScreen;
-            
-            // Animasi Keluar
-            activeScreen.classList.remove('fade-enter', 'fade-enter-active');
-            activeScreen.classList.add('fade-exit');
-            
-            // Tunggu sebentar, lalu update data & animasi masuk
-            setTimeout(() => {
-                activeScreen.classList.add('fade-exit-active');
-                
-                setTimeout(() => {
-                    callback(); // Jalankan logika load level / back home di sini
-                    
-                    // Reset kelas animasi
-                    activeScreen.classList.remove('fade-exit', 'fade-exit-active');
-                    
-                    // Ambil screen tujuan (yang baru saja di-remove hidden-force nya)
-                    const newActiveScreen = gameScreen.classList.contains('hidden-force') ? homeScreen : gameScreen;
-                    
-                    // Animasi Masuk
-                    newActiveScreen.classList.add('fade-enter');
-                    // Force reflow
-                    void newActiveScreen.offsetWidth;
-                    newActiveScreen.classList.add('fade-enter-active');
-                    
-                    // Bersihkan kelas setelah animasi selesai (opsional)
-                    setTimeout(() => {
-                        newActiveScreen.classList.remove('fade-enter', 'fade-enter-active');
-                    }, 400);
-                    
-                }, 300); // Waktu exit
-            }, 50);
-        }
-
         function loadLevel(levelNum) {
-            // Bungkus logika load level dalam fungsi transisi
-            transitionLevel(() => {
+            const homeScreen = document.getElementById('home-screen');
+            const gameScreen = document.getElementById('game-screen');
+            
+            // 1. Animasi Keluar Home
+            homeScreen.classList.add('screen-hidden-anim');
+            
+            setTimeout(() => {
+                homeScreen.classList.add('hidden-force');
+                
+                // Load Logic
                 currentLevelIdx = levelNum - 1;
                 hintsRemaining = 5; 
                 document.getElementById('hint-count').innerText = hintsRemaining;
                 document.getElementById('hint-btn').classList.remove('opacity-50', 'cursor-not-allowed');
-                
+                document.getElementById('explanation-btn').classList.add('hidden');
+
                 let diffLabel = "";
                 let autoHints = 0;
-
                 if (levelNum <= 10) { diffLabel = "Mudah (2 Bantuan)"; autoHints = 2; } 
                 else if (levelNum <= 30) { diffLabel = "Sedang (1 Bantuan)"; autoHints = 1; } 
                 else { diffLabel = "Sulit (0 Bantuan)"; autoHints = 0; }
@@ -562,9 +548,7 @@
                 else badge.className = `text-xs font-bold px-2 py-1 rounded mt-1 bg-red-100 text-red-600`;
 
                 const levelData = LEVEL_DATA[currentLevelIdx % LEVEL_DATA.length];
-                document.getElementById('home-screen').classList.add('hidden-force');
-                document.getElementById('game-screen').classList.remove('hidden-force');
-                document.getElementById('game-screen').classList.add('flex'); // Pastikan display flex aktif
+                
                 document.getElementById('level-title').innerText = `Level ${levelNum}`;
                 document.getElementById('mistake-counter').innerText = "0";
                 document.getElementById('mistake-counter').className = "text-2xl font-bold text-gray-700";
@@ -572,7 +556,17 @@
                 generateMapping(levelData);
                 renderGame(levelData);
                 if(autoHints > 0) revealRandomHint(autoHints);
-            });
+                checkQuoteCompletion();
+
+                // 2. Animasi Masuk Game
+                gameScreen.classList.remove('hidden-force');
+                gameScreen.classList.add('flex'); // Pastikan display flex
+                
+                // Sedikit delay agar transisi CSS berjalan
+                requestAnimationFrame(() => {
+                    gameScreen.classList.remove('screen-hidden-anim');
+                });
+            }, 300); // Sesuaikan dengan durasi CSS transition
         }
 
         function generateMapping(data) {
@@ -589,7 +583,7 @@
             qContainer.innerHTML = ''; cContainer.innerHTML = '';
             data.quote.split(' ').forEach(word => {
                 const wrap = document.createElement('div'); wrap.className = 'word-wrapper';
-                for(let char of word) wrap.appendChild(createBox(char));
+                for(let char of word) wrap.appendChild(createBox(char, true)); // true indicates it's a quote box
                 qContainer.appendChild(wrap);
             });
             data.clues.forEach(clue => {
@@ -599,17 +593,17 @@
                 const inputs = document.createElement('div'); inputs.className = "flex flex-wrap";
                 clue.a.split(' ').forEach(word => {
                     const wrap = document.createElement('div'); wrap.className = 'word-wrapper';
-                    for(let char of word) wrap.appendChild(createBox(char));
+                    for(let char of word) wrap.appendChild(createBox(char, false));
                     inputs.appendChild(wrap);
                 });
                 row.appendChild(inputs); cContainer.appendChild(row);
             });
         }
 
-        function createBox(char) {
+        function createBox(char, isQuote) {
             char = char.toUpperCase(); const num = charToNumberMap[char];
             const div = document.createElement('div'); div.className = 'char-box';
-            div.innerHTML = `<input type="text" maxlength="1" class="letter-input" data-number="${num}" data-real="${char}" autocomplete="off" inputmode="text"><span class="text-[0.7rem] font-bold text-gray-400 mt-1">${num}</span>`;
+            div.innerHTML = `<input type="text" maxlength="1" class="letter-input ${isQuote ? 'quote-input' : ''}" data-number="${num}" data-real="${char}" autocomplete="off" inputmode="text"><span class="text-[0.7rem] font-bold text-gray-400 mt-1">${num}</span>`;
             const inp = div.querySelector('input');
             inp.addEventListener('input', (e) => handleInput(e, inp));
             inp.addEventListener('focus', (e) => { lastFocusedInput = inp; highlightBoxes(num, true); });
@@ -632,10 +626,10 @@
                         inp.value = char; inp.classList.add('locked');
                     });
                 }
+                checkQuoteCompletion();
             }, 500);
         }
 
-        // --- HINT FUNCTION ---
         function useHint() {
             if (hintsRemaining <= 0) { showInfoPopup("Bantuan sudah habis!"); return; }
             let targetChar = null;
@@ -653,22 +647,35 @@
                     inp.value = targetChar; inp.classList.add('locked'); inp.classList.remove('animate-pop'); void inp.offsetWidth; inp.classList.add('animate-pop');
                 });
                 playUnlockSound();
+                checkQuoteCompletion();
             } else { showInfoPopup("Semua kotak sudah terisi!"); }
         }
 
-        // --- SMART SKIP & INPUT LOGIC ---
         function handleInput(e, el) {
             e.stopPropagation(); let val = e.target.value.toUpperCase();
             if(!/^[A-Z]$/.test(val)) { if(val === "") syncInputs(el.dataset.number, ""); else el.value = ""; return; }
-            playTypeSound(); syncInputs(el.dataset.number, val); focusNextUnlockedInput(el);
+            playTypeSound(); syncInputs(el.dataset.number, val); 
+            
+            // Perbaikan Logika Navigasi Otomatis
+            focusNextUnlockedInput(el);
+            
+            checkQuoteCompletion();
         }
         
+        // --- IMPROVED INPUT NAVIGATION LOGIC ---
         function focusNextUnlockedInput(currentInput) {
-            const wrapper = currentInput.closest('.word-wrapper'); if(!wrapper) return;
-            const inputs = Array.from(wrapper.querySelectorAll('.letter-input')); const currIdx = inputs.indexOf(currentInput);
-            for(let i = currIdx + 1; i < inputs.length; i++) {
-                // SKIP jika LOCKED atau SUDAH ADA ISI
-                if(!inputs[i].classList.contains('locked') && inputs[i].value === "") { inputs[i].focus(); return; }
+            // Ambil semua input dalam satu array datar untuk navigasi lintas kata
+            const allInputs = Array.from(document.querySelectorAll('.letter-input'));
+            const currentIndex = allInputs.indexOf(currentInput);
+
+            // Cari input kosong berikutnya mulai dari indeks sekarang
+            for (let i = currentIndex + 1; i < allInputs.length; i++) {
+                const nextInput = allInputs[i];
+                // Jika input tidak terkunci dan masih kosong, pindahkan fokus
+                if (!nextInput.classList.contains('locked') && nextInput.value === "") {
+                    nextInput.focus();
+                    return; // Berhenti setelah menemukan target
+                }
             }
         }
 
@@ -676,6 +683,26 @@
             document.querySelectorAll(`.letter-input[data-number="${num}"]`).forEach(inp => {
                 if(!inp.classList.contains('locked')) { inp.value = char; if(char) { inp.classList.remove('animate-pop'); void inp.offsetWidth; inp.classList.add('animate-pop'); } }
             });
+        }
+
+        function checkQuoteCompletion() {
+            const quoteInputs = document.querySelectorAll('.quote-input');
+            let allCorrect = true;
+            
+            quoteInputs.forEach(inp => {
+                if (inp.value !== inp.dataset.real) {
+                    allCorrect = false;
+                }
+            });
+
+            const btn = document.getElementById('explanation-btn');
+            if (allCorrect) {
+                btn.classList.remove('hidden');
+                btn.classList.add('animate-bounce');
+                setTimeout(() => btn.classList.remove('animate-bounce'), 2000);
+            } else {
+                btn.classList.add('hidden');
+            }
         }
 
         function highlightBoxes(num, isActive) {
@@ -698,10 +725,10 @@
             inputs.forEach(inp => { if(inp.value !== inp.dataset.real) { isCorrect = false; levelErrors++; if(inp.value !== "") inp.style.color = "red"; } });
             if(!isCorrect) { if(levelErrors > 0) currentMistakes++; const counter = document.getElementById('mistake-counter'); counter.innerText = currentMistakes; counter.className = "text-2xl font-bold text-red-500 animate-pulse"; showToast(levelErrors); playBuzzer(); return; }
             playWinTune(); let stars = 0; if(currentMistakes === 0) stars = 3; else if(currentMistakes <= 3) stars = 2; else stars = 1;
+            document.getElementById('explanation-btn').classList.remove('hidden');
             showWinModal(stars);
         }
 
-        // --- ANIMASI BINTANG TERBANG ---
         function animateStarsCollection(earnedStars) {
             const startContainer = document.getElementById('modal-stars');
             const targetElement = document.getElementById('star-display-fixed');
@@ -741,10 +768,9 @@
 
             if(stars >= 2) {
                 emoji.innerText = "🎉"; document.getElementById('result-title').innerText = "LEVEL SELESAI!"; document.getElementById('result-title').className = "text-2xl font-bold text-green-600 mb-2";
-                if(userProgress.unlockedLevel < levelNum + 1 && levelNum < 50) userProgress.unlockedLevel = levelNum + 1;
+                if(userProgress.unlockedLevel < levelNum + 1 && levelNum < 100) userProgress.unlockedLevel = levelNum + 1;
                 
-                if(levelNum === 50) { 
-                    // Level 50 Selesai (Tamat)
+                if(levelNum === 100) { 
                     msg.innerText = "Selamat! Kamu menamatkan semua level!"; 
                     btnNext.classList.add('hidden-force'); 
                     setTimeout(() => window.location.href = "tamat_preview.html", 3000);
@@ -762,22 +788,39 @@
 
         function nextLevel() { 
             document.getElementById('win-modal').classList.add('hidden-force'); 
-            loadLevel(currentLevelIdx + 2); // Gunakan loadLevel baru dengan transisi
+            
+            // Animasi transisi keluar game sebelum masuk level baru
+            const gameScreen = document.getElementById('game-screen');
+            gameScreen.classList.add('screen-hidden-anim');
+            
+            setTimeout(() => {
+                loadLevel(currentLevelIdx + 2);
+            }, 300);
         }
-        function restartLevel() { 
-            document.getElementById('win-modal').classList.add('hidden-force'); 
-            loadLevel(currentLevelIdx + 1); // Gunakan loadLevel baru dengan transisi
-        }
+
+        function restartLevel() { document.getElementById('win-modal').classList.add('hidden-force'); loadLevel(currentLevelIdx + 1); }
         
-        function backToHome() {
-            // Gunakan efek transisi saat kembali ke home
-            transitionLevel(() => {
-                document.getElementById('game-screen').classList.add('hidden-force');
-                document.getElementById('game-screen').classList.remove('flex');
-                document.getElementById('win-modal').classList.add('hidden-force');
-                document.getElementById('home-screen').classList.remove('hidden-force');
+        function backToHome() { 
+            const gameScreen = document.getElementById('game-screen');
+            const homeScreen = document.getElementById('home-screen');
+            const winModal = document.getElementById('win-modal');
+            
+            winModal.classList.add('hidden-force');
+            
+            // Animasi Keluar Game
+            gameScreen.classList.add('screen-hidden-anim');
+            
+            setTimeout(() => {
+                gameScreen.classList.add('hidden-force'); 
+                gameScreen.classList.remove('flex');
+                
+                homeScreen.classList.remove('hidden-force');
                 renderLevelGrid();
-            });
+                
+                requestAnimationFrame(() => {
+                    homeScreen.classList.remove('screen-hidden-anim');
+                });
+            }, 300);
         }
 
         function showToast(count) { const wrapper = document.getElementById('error-toast-wrapper'); document.getElementById('toast-count').innerText = count; wrapper.classList.remove('hidden-force'); }
@@ -791,5 +834,3 @@
     </script>
 </body>
 </html>
-
-
