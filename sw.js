@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sandikata-v1'; // GANTI INI KE 'v2', 'v3', dst setiap kali update kode!
+const CACHE_NAME = 'sandikata-v2'; // GANTI INI KE 'v2', 'v3', dst setiap kali update kode!
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
