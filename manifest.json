@@ -8,13 +8,13 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "https://ui-avatars.com/api/?name=SK&background=86efac&color=d946ef&size=192&rounded=true&bold=true&length=2",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "https://ui-avatars.com/api/?name=SK&background=86efac&color=d946ef&size=512&rounded=true&bold=true&length=2",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
